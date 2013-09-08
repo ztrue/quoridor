@@ -100,12 +100,12 @@ exports.response = function(callback, err, data) {
 
 /**
  * Send event
- * @param {Object} emiter Event emiter
+ * @param {Object} emitter Event emitter
  * @param {string} event Event name
  * @param {Object} opt_data Event data
  */
-exports.send = function(emiter, event, opt_data) {
-  emiter.emit(event, opt_data || {});
+exports.send = function(emitter, event, opt_data) {
+  emitter.emit(event, opt_data || {});
 };
 
 /**
