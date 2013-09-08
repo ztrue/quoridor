@@ -1,0 +1,105 @@
+@cellSize: 32px;
+@cellBackground: #eee;
+@cellActiveBackgroudn: #fcc;
+@cellHoveredBackground: #cff;
+
+@wallSize: 8px;
+@wallBackground: #ccc;
+@wallFilledBackground: #666;
+@wallHoveredBackground: #cff;
+
+@playerSize: @cellSize * 0.6;
+@playerMargin: (@cellSize - @playerSize) / 2;
+@playerRadius: @playerSize / 2;
+@player0Background: #c00;
+@player1Background: #00c;
+@player2Background: #0c0;
+@player3Background: #cc0;
+
+@winnerBackground: #9f9;
+@meBackground: #eee;
+
+.field {
+  border: solid @wallSize;
+  border-right-color: @player0Background;
+  border-left-color: @player1Background;
+  border-bottom-color: @player2Background;
+  border-top-color: @player3Background;
+
+  .cell {
+    background: @cellBackground;
+    height: @cellSize;
+    width: @cellSize;
+  }
+
+  .cell.hovered {
+    background: @cellHoveredBackground;
+  }
+
+  .cell.active {
+    background: @cellActiveBackgroudn;
+  }
+}
+
+.wall {
+  background: @wallBackground;
+  height: @wallSize;
+  width: @wallSize;
+}
+
+.wall.wall-horizontal {
+  width: @cellSize;
+}
+
+.wall.wall-vertical {
+  height: @cellSize;
+}
+
+.wall.hovered {
+  background: @wallHoveredBackground;
+}
+
+.wall.wall-filled {
+  background: @wallFilledBackground;
+}
+
+.player {
+  border-radius: @playerRadius;
+  height: @playerSize;
+  margin: @playerMargin;
+  width: @playerSize;
+}
+
+.player.player-0 {
+  background: @player0Background;
+}
+
+.player.player-1 {
+  background: @player1Background;
+}
+
+.player.player-2 {
+  background: @player2Background;
+}
+
+.player.player-3 {
+  background: @player3Background;
+}
+
+.stats {
+  .item {
+    margin-bottom: @wallSize;
+
+    .wall {
+      margin-right: @wallSize;
+    }
+  }
+
+  .item.me {
+    background: @meBackground;
+  }
+
+  .item.winner {
+    background: @winnerBackground;
+  }
+}
