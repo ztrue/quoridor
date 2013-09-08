@@ -6,7 +6,7 @@ exports.LOGGER = '';
 
 exports.PUBLIC = PATH_BIN; // PATH_BUILD for dev
 
-if (fs.existsSync(PATH_CONFIGS + 'config.local')) {
+if (fs.existsSync(PATH_CONFIGS + 'config.local.js')) {
   var configLocal = require(PATH_CONFIGS + 'config.local');
 
   // rewrite default config with local config
