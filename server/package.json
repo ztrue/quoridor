@@ -1,0 +1,13 @@
+{
+  "name": "quoridor",
+  "dependencies": {
+    "cookie": "*",
+    "express": "*",
+    "socket.io": "*"
+  },
+  "engines": {
+    "node": "0.10.x",
+    "npm": "1.2.x"
+  },
+  "main": "app.js"
+}
