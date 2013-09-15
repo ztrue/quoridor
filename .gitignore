@@ -1,0 +1,4 @@
+client/bin/
+client/build/
+node_modules/
+server/configs/env.local.js
