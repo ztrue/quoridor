@@ -4,7 +4,7 @@
  */
 exports.PLAYERS_MIN = 2;
 exports.PLAYERS_MAX = 4;
-exports.PLAYERS_DEFAULT = 4;
+exports.PLAYERS_DEFAULT = 2;
 
 /**
  * Field size
