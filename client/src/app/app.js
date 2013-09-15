@@ -1,20 +1,14 @@
-angular.module('quoridor', [
-  'templates-app',
-  'templates-common',
-  'quoridor.home',
-  'ui.state',
-  'ui.route'
-])
-
-.config(function myAppConfig($stateProvider, $urlRouterProvider) {
-  $urlRouterProvider.otherwise('/home');
-})
-
-.run(function run (titleService) {
-  titleService.setSuffix(' | quoridor');
-})
-
-.controller('AppCtrl', function AppCtrl($scope, $location) {
-})
-
-;
+angular
+  .module('quoridor', [
+    'quoridor.home',
+    'faf',
+    'ui.router.state'
+  ])
+  .config(function($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.otherwise('/home');
+  })
+  .run(function(titleService) {
+    titleService.setSuffix(' | quoridor');
+  })
+  .controller('AppCtrl', function($scope, $location) {
+  });

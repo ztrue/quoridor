@@ -1,24 +1,21 @@
-angular.module('quoridor.home', [
-  'ui.state',
-  'titleService',
-  'range',
-  'quoridor.game'
-])
-
-.config(function config($stateProvider) {
-  $stateProvider.state('home', {
-    url: '/home',
-    views: {
-      "main": {
-        controller: 'HomeCtrl',
-        templateUrl: 'home/home.tpl.html'
+angular
+  .module('quoridor.home', [
+    'quoridor.game',
+    'faf',
+    'ui.router.state',
+    'titleService'
+  ])
+  .config(function($stateProvider) {
+    $stateProvider.state('home', {
+      url: '/home',
+      views: {
+        main: {
+          controller: 'HomeCtrl',
+          templateUrl: '/app/home/home.tpl.html'
+        }
       }
-    }
+    });
+  })
+  .controller('HomeCtrl', function($scope, titleService) {
+      titleService.setTitle('Home');
   });
-})
-
-.controller('HomeCtrl', function HomeController($scope, titleService) {
-    titleService.setTitle('Home');
-})
-
-;

@@ -10,22 +10,13 @@
     <meta property="og:image" content="">
     <meta property="og:description" content="Quoridor game. Online version.">
 
-    <!-- font awesome from BootstrapCDN -->
-    <link href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
-
-    <!-- compiled CSS -->
-    <% styles.forEach(function(file) { %>
-      <link rel="stylesheet" type="text/css" href="<%= file %>" />
+    <% css.forEach(function(path) { %>
+      <link href="<%= path %>" rel="stylesheet" type="text/css">
     <% }); %>
 
-    <!--[if IE 7>
-      <link rel="stylesheet" href="assets/font-awesome-ie7.min.css />
-    <![endif]-->
-
     <script src="/socket.io/socket.io.js"></script>
-    <!-- compiled JS -->
-    <% scripts.forEach(function(file) { %>
-      <script type="text/javascript" src="<%= file %>"></script>
+    <% js.forEach(function(path) { %>
+      <script type="text/javascript" src="<%= path %>"></script>
     <% }); %>
   </head>
   <body>
