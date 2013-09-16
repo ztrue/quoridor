@@ -1,3 +1,3 @@
-describe('game', function() {
-  beforeEach(module('quoridor.game'));
+describe('quoridor', function() {
+  beforeEach(module('quoridor.quoridor'));
 });

@@ -2,13 +2,13 @@
  * Quoridor game
  */
 angular
-  .module('quoridor.game', [
+  .module('quoridor.quoridor', [
     'faf'
   ])
-  .directive('game', function($comet) {
+  .directive('quoridor', function($comet) {
     return {
       restrict: 'E',
-      templateUrl: '/common/directives/game/game.tpl.html',
+      templateUrl: '/common/directives/quoridor/quoridor.tpl.html',
       scope: {},
       link: function(scope) {
         /**

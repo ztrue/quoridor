@@ -1,6 +1,5 @@
 angular
   .module('quoridor.home', [
-    'quoridor.game',
     'faf',
     'ui.router.state',
     'titleService'
