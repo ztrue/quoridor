@@ -15,7 +15,7 @@ angular
       },
 
       setTitle: function(value) {
-        title = suffix + value;
+        title = value + suffix;
         $document.prop('title', title);
       },
 
