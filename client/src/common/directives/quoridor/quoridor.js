@@ -158,7 +158,7 @@ angular
           $comet
             .connect()
             // load state
-            .emit(scope.Events.client.GET_STATE, null, function(err, data) {
+            .emit(scope.Events.client.GET_STATE, function(err, data) {
               if (!err) {
                 scope.setState(data.state);
               }
@@ -184,7 +184,7 @@ angular
          * Join game
          */
         scope.join = function() {
-          $comet.emit(scope.Events.client.JOIN, null, function(err, data) {
+          $comet.emit(scope.Events.client.JOIN, function(err, data) {
             if (!err) {
               scope.model.uid = data.uid;
             }
@@ -195,7 +195,7 @@ angular
          * Exit from game
          */
         scope.exit = function() {
-          $comet.emit(scope.Events.client.EXIT, null, function(err) {
+          $comet.emit(scope.Events.client.EXIT, function(err) {
             if (!err) {
               scope.model.uid = null;
             }

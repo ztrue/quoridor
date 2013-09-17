@@ -9,7 +9,7 @@ angular
     $urlRouterProvider.otherwise('/home');
   })
   .run(function(titleService) {
-    titleService.setSuffix(' | quoridor');
+    titleService.setSuffix(' | ' + titleService.getTitle());
   })
   .controller('AppCtrl', function($scope, $location) {
   });

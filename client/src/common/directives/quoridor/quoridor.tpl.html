@@ -4,15 +4,15 @@
     <form class="form-inline">
       <label>Players:</label>
       <div class="form-group">
-        <input class="form-control input-short" ng-value="model.state.config.players" disabled type="text">
+        <input class="form-control input-short" ng-model="model.state.config.players" disabled type="text">
       </div>
       <label>Size:</label>
       <div class="form-group">
-        <input class="form-control input-short" ng-value="model.state.config.size" disabled type="text">
+        <input class="form-control input-short" ng-model="model.state.config.size" disabled type="text">
       </div>
       <label>Walls:</label>
       <div class="form-group">
-        <input class="form-control input-short" ng-value="model.state.config.walls" disabled type="text">
+        <input class="form-control input-short" ng-model="model.state.config.walls" disabled type="text">
       </div>
       <button class="btn btn-primary" ng-click="join()" ng-show="isJoinable()">Join</button>
       <button class="btn btn-danger" ng-click="exit()" ng-show="isExitable()">Exit</button>
