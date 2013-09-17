@@ -48,11 +48,10 @@ module.exports = {
   /**
    * @see abstract::constructor()
    */
-  constructor: function(data) {
-    var config = _(this.getDefaultConfig()).extend(data.config);
-    this.validateConfig(config);
-    this.config = config;
-    this.id = data.id || null;
+  constructor: function(opt_data) {
+    this.config = this.getDefaultConfig();
+    this.id = null;
+    this.set(opt_data);
     this.reset();
   },
 
@@ -69,31 +68,30 @@ module.exports = {
   },
 
   /**
-   * Config validation
-   * @param {Config} config Game config
+   * @see abstract::validate()
    */
-  validateConfig: function(config) {
-    if (config.players > this.PLAYERS_MAX) {
+  validate: function() {
+    if (this.config.players > this.PLAYERS_MAX) {
       throw 'Maximum players: ' + this.PLAYERS_MAX;
     }
 
-    if (config.players < this.PLAYERS_MIN) {
+    if (this.config.players < this.PLAYERS_MIN) {
       throw 'Minimum players: ' + this.PLAYERS_MIN;
     }
 
-    if (config.size > this.SIZE_MAX) {
+    if (this.config.size > this.SIZE_MAX) {
       throw 'Maximum size: ' + this.SIZE_MAX;
     }
 
-    if (config.size < this.SIZE_MIN) {
+    if (this.config.size < this.SIZE_MIN) {
       throw 'Minimum size: ' + this.SIZE_MIN;
     }
 
-    if (config.walls > this.WALLS_MAX) {
+    if (this.config.walls > this.WALLS_MAX) {
       throw 'Maximum walls: ' + this.WALLS_MAX;
     }
 
-    if (config.walls < this.WALLS_MIN) {
+    if (this.config.walls < this.WALLS_MIN) {
       throw 'Minimum walls: ' + this.WALLS_MIN;
     }
   },
@@ -222,17 +220,12 @@ module.exports = {
    */
   resetPlayers: function() {
     for (var i = 0; i < this.config.players; i++) {
-      this.state.players.push({
-        finish: {
-          col: null,
-          row: null
-        },
+      var player = faf.model('player').new({
         index: i,
-        position: {
-          col: null,
-          row: null
+        finish: {
+          col: this.positions.finish[i].col,
+          row: this.positions.finish[i].row
         },
-        uid: null,
         walls: this.config.walls
       });
     }
@@ -302,9 +295,7 @@ module.exports = {
     var index = null;
 
     this.state.players.forEach(function(player) {
-      var atFinishRow = player.position.row !== null && player.position.row === player.finish.row;
-      var atFinishCol = player.position.col !== null && player.position.col === player.finish.col;
-      if (player.uid !== null && (atFinishRow || atFinishCol)) {
+      if (player.isWinner()) {
         index = player.index;
       }
     }.bind(this));
@@ -352,11 +343,13 @@ module.exports = {
     }
 
     if (emptyIndex !== null) {
-      players[emptyIndex].uid = uid;
-      players[emptyIndex].position.row = this.positions.start[emptyIndex].row;
-      players[emptyIndex].position.col = this.positions.start[emptyIndex].col;
-      players[emptyIndex].finish.row = this.positions.finish[emptyIndex].row;
-      players[emptyIndex].finish.col = this.positions.finish[emptyIndex].col;
+      players[emptyIndex].set({
+        uid: uid,
+        position: {
+          col: this.positions.start[emptyIndex].col,
+          row: this.positions.start[emptyIndex].row
+        }
+      });
     }
 
     return emptyIndex;
@@ -372,9 +365,7 @@ module.exports = {
 
     this.state.players.forEach(function(player) {
       if (player.uid === uid) {
-        player.uid = null;
-        player.position.row = null;
-        player.position.col = null;
+        player.reset();
         index = player.index;
       }
     }.bind(this));
@@ -389,7 +380,7 @@ module.exports = {
   countPlayers: function() {
     var counter = 0;
 
-    _(this.state.players).each(function(player) {
+    this.state.players.forEach(function(player) {
       if (player.uid !== null) {
         counter++;
       }
