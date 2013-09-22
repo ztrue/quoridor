@@ -15,7 +15,7 @@ angular
       }
     });
   })
-  .controller('HomeCtrl', function($scope, titleService, $comet) {
+  .controller('HomeCtrl', function($scope, titleService, $comet, $state) {
     titleService.setTitle('Home');
 
     /**
@@ -26,47 +26,108 @@ angular
       client: {
         CREATE: 'create',
         GET_DEFAULT_CONFIG: 'getDefaultConfig',
-        GET_GAMES_LIST: 'getGamesList'
+        GET_GAMES_LIST: 'getGamesList',
+        JOIN: 'join'
       },
       server: {
         SET_GAMES_LIST: 'setGamesList'
       }
     };
 
+    /**
+     * Page model
+     * @type {Object}
+     */
     $scope.model = {
+      /**
+       * Games
+       * @type {Array.<Object>}
+       * @schema {
+       *   config: Config,
+       *   id: string,
+       *   state: State
+       * }
+       */
       games: [],
+      /**
+       * New game form
+       * @type {Object}
+       */
       form: {
+        /**
+         * Form data
+         * @type {Object}
+         */
         data: {
-          players: 0,
-          size: 0,
-          walls: 0
+          /**
+           * Number of players
+           * @type {string}
+           */
+          players: '0',
+          /**
+           * Field size
+           * @type {string}
+           */
+          size: '0',
+          /**
+           * Number of walls for each player
+           * @type {string}
+           */
+          walls: '0'
         },
+        /**
+         * Form error
+         * @type {string}
+         */
         error: null
       }
     };
 
+    /**
+     * Page initialization
+     */
     $scope.init = function() {
       $comet
         .connect()
+        // get default game config
         .emit($scope.Events.client.GET_DEFAULT_CONFIG, function(err, data) {
           if (!err) {
             $scope.model.form.data = data.config;
           }
         })
+        // get games list
         .emit($scope.Events.client.GET_GAMES_LIST, function(err, data) {
           if (!err) {
             $scope.setGamesList(data.games);
           }
         })
+        // listen games list
         .on($scope.Events.server.SET_GAMES_LIST, function(data) {
           $scope.setGamesList(data.games);
         });
     };
 
+    /**
+     * Set games list
+     * @param {Array.<Object>} games Joinable games
+     */
     $scope.setGamesList = function(games) {
       $scope.model.games = games;
     };
 
+    /**
+     * Open game page
+     * @param {string} gameId Game ID
+     */
+    $scope.open = function(gameId) {
+      $state.go('game', {
+        gameId: gameId
+      });
+    };
+
+    /**
+     * Create new game
+     */
     $scope.create = function() {
       $scope.model.form.error = null;
 
@@ -80,7 +141,7 @@ angular
         if (err) {
           $scope.model.form.error = err;
         } else {
-          // TODO go to game page
+          $scope.open(data.gameId);
         }
       });
     };

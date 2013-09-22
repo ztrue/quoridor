@@ -4,126 +4,160 @@ var _ = require('underscore');
  * Timeout for new game after end, ms
  * @const {number}
  */
-exports.TIMEOUT_DEFAULT = TIME.MS_IN_MINUTE * 5;
+var TIMEOUT_DEFAULT = TIME.MS_IN_SECOND * 5;
 
 /**
  * Games collection (game ID as key)
  * @type {Object.<string, Game>}
  */
-exports.games = {};
+var games = {};
 
-exports.createGame = function(config) {
-  var gameId = this.newGameId();
+/**
+ * Create new game
+ * @param {Object} config Game config
+ * @returns {Game} Created game
+ */
+function createGame(config) {
+  var gameId = generateGameId();
   var game = faf.model('game').new({
     config: config,
     id: gameId
   });
-  this.reset(game);
-  this.games[gameId] = game;
+  games[gameId] = game;
   return game;
-};
+}
 
-exports.newGameId = function() {
+/**
+ * Generate unique game ID
+ * @returns {string} Game ID
+ */
+function generateGameId() {
   do {
     var gameId = Math.random().toString().replace(/^0\./, '_');
-  } while(!gameId || this.games[gameId]);
+  } while(!gameId || games[gameId]);
 
   return gameId;
-};
+}
 
 /**
  * Reset game
  * @param {Game} game Game
  */
-exports.reset = function(game) {
+function reset(game) {
   game.reset();
-  this.resetSockets(game);
-  this.setState(game);
-};
+  resetSockets(game);
+  setState(game);
+  setGamesList();
+}
 
 /**
  * Reset sockets indexes
  * @param {Game} game Game
  */
-exports.resetSockets = function(game) {
-  // TODO reset UID only for passed game
-  _(this.sockets.sockets).each(function(socket) {
-    socket.set('index', null);
-  }.bind(this));
+function resetSockets(game) {
+  var uids = [];
 
-  this.client.resetUid();
-};
+  game.state.players.forEach(function(player) {
+    if (player.uid) {
+      uids.push(player.uid);
+    }
+  });
+
+  // TODO reset UID only for passed game
+  uids.forEach(function(uid) {
+    faf.module('faf.auth').set(uid, 'index', null);
+  });
+
+  module.exports.client.resetUid(null, {
+    gameId: game.id
+  });
+}
 
 /**
  * Game reset with timeout
  * @param {Game} game Game
- * @param {number} timeout Timeout, ms
+ * @param {number=} opt_timeout Timeout, ms
  */
-exports.deferReset = function(game, timeout) {
-  setTimeout(this.reset.bind(this, game), timeout || this.TIMEOUT_DEFAULT);
-};
+function deferReset(game, opt_timeout) {
+  setTimeout(reset.bind(this, game), opt_timeout || TIMEOUT_DEFAULT);
+}
 
 /**
  * Set state on clients
  * @param {Game} game Game
  */
-exports.setState = function(game) {
-  this.client.setState(null, {
+function setState(game) {
+  module.exports.client.setState(null, {
     gameId: game.id,
     state: game.state
   });
-};
+}
 
-exports.getInactiveGames = function() {
-  var games = [];
+/**
+ * Set games list on client
+ */
+function setGamesList() {
+  module.exports.client.setGamesList(null, {
+    games: getJoinableGames()
+  });
+}
 
-  _(this.games).each(function(game) {
+/**
+ * Get joinable games list
+ * @returns {Array.<Object>}
+ */
+function getJoinableGames() {
+  var data = [];
+
+  _(games).each(function(game) {
     if (!game.state.inProgress) {
-      games.push({
+      data.push({
         config: game.config,
-        gameId: games.gameId
+        id: game.id,
+        joinedPlayers: game.countPlayers()
       });
     }
   });
 
-  return games;
-};
+  return data;
+}
 
-exports.clientEmitters = {
-  resetUid: null,
-  setGamesList: null,
-  setState: null
-};
-
-exports.clientListeners = {
+module.exports = {
   /**
-   * On command event
-   * @param {Socket} socket Socket
-   * @param {function(?string, Object)} callback Event callback
-   * @param {Object} data Event data
+   * @see abstract::clientEmitters
    */
-  command: function(socket, callback, data) {
-    socket.get('index', function(err, index) {
+  clientEmitters: {
+    resetUid: null,
+    setGamesList: null,
+    setState: null
+  },
+
+  /**
+   * @see abstract::clientListeners
+   */
+  clientListeners: {
+    /**
+     * On command event
+     * @param {Socket} socket Socket
+     * @param {function(?string, Object)} callback Event callback
+     * @param {Object} data Event data
+     */
+    command: function(socket, callback, data) {
       try {
-        var game = this.games[data.gameId];
+        var game = games[data.gameId];
         if (!game) {
-          throw 'Game not exists';
+          throw 'Game does not exists';
         }
 
-        if (typeof index === 'string') {
-          index = parseInt(index, 10);
-        }
-
+        var index = faf.module('faf.auth').getBySocketId(socket.id, 'index');
         // TODO check by UID, not by index
         // TODO check at game model, not here
-        if (game.state.activePlayer !== index) {
+        if (index === null || game.state.activePlayer !== index) {
           throw 'It\'s not your turn';
         }
 
         // try to execute command
-        if (!game.command(data.data)) {
-          throw 'Invalid command';
-        }
+        game.command(data);
 
         // check winner
         // TODO do it at game model
@@ -134,160 +168,186 @@ exports.clientListeners = {
         } else {
           game.state.activePlayer = null;
           game.state.winner = winner;
-          this.deferReset(game);
+          deferReset(game);
         }
 
-        this.setState(game);
+        setState(game);
         callback();
       } catch (err) {
         callback(err);
       }
-    }.bind(this));
-  },
+    },
 
-  /**
-   * On user connect
-   * @param {Socket} socket Socket
-   */
-  connection: function(socket) {
-    socket.set('index', null);
-  },
+    /**
+     * On user connection
+     * @param {Socket} socket Socket
+     */
+    connection: function(socket) {
+      // uid is equal to socket ID
+      faf.module('faf.auth').bind(socket.id, socket.id);
+    },
 
-  create: function(socket, callback, data) {
-    try {
-      if (data.players !== undefined) {
-        data.players = parseInt(data.players, 10) || 0;
-      }
-
-      if (data.size !== undefined) {
-        data.size = parseInt(data.size, 10) || 0;
-      }
-
-      if (data.walls !== undefined) {
-        data.walls = parseInt(data.walls, 10) || 0;
-      }
-
-      var game = this.createGame(data);
-      this.client.setGamesList(null, {
-        games: this.getInactiveGames()
-      });
-      callback(null, {
-        gameId: game.id
-      });
-    } catch (err) {
-      callback(err);
-    }
-  },
-
-  /**
-   * On user disconnect
-   * @param {Socket} socket Socket
-   */
-  disconnect: function(socket) {
-    _(this.games).each(function(game) {
-      var index = game.exit(socket.id);
-
-      if (index !== null) {
-        if (game.state.winner !== null) {
-          this.deferReset(game);
+    /**
+     * On create game event
+     * @param {Socket} socket Socket
+     * @param {function(?string, Object)} callback Event callback
+     * @param {Object} data Event data
+     */
+    create: function(socket, callback, data) {
+      try {
+        if (data.players !== undefined) {
+          data.players = parseInt(data.players, 10) || 0;
         }
-        this.setState(game);
-      }
-    }.bind(this));
-  },
 
-  /**
-   * On exit event
-   * @param {Socket} socket Socket
-   * @param {function(?string, Object)} callback Event callback
-   * @param {Object} data Event data
-   */
-  exit: function(socket, callback, data) {
-    try {
-      var game = this.games[data.gameId];
-      if (!game) {
-        throw 'Game not exists';
-      }
+        if (data.size !== undefined) {
+          data.size = parseInt(data.size, 10) || 0;
+        }
 
-      var index = game.exit(socket.id);
-      socket.set('index', null, function() {
+        if (data.walls !== undefined) {
+          data.walls = parseInt(data.walls, 10) || 0;
+        }
+
+        var game = createGame(data);
+        setGamesList();
+        callback(null, {
+          gameId: game.id
+        });
+      } catch (err) {
+
+        callback(err);
+      }
+    },
+
+    /**
+     * On user disconnect
+     * @param {Socket} socket Socket
+     */
+    disconnect: function(socket) {
+      var uid = faf.module('faf.auth').getUserId(socket.id);
+
+      _(games).each(function(game) {
+        var index = game.exit(uid);
+
+        if (index !== null) {
+          if (game.state.winner !== null) {
+            deferReset(game);
+          }
+          setState(game);
+          setGamesList();
+        }
+      });
+    },
+
+    /**
+     * On exit event
+     * @param {Socket} socket Socket
+     * @param {function(?string, Object)} callback Event callback
+     * @param {Object} data Event data
+     */
+    exit: function(socket, callback, data) {
+      try {
+        var game = games[data.gameId];
+        if (!game) {
+          throw 'Game not exists';
+        }
+
+        var uid = faf.module('faf.auth').getUserId(socket.id);
+
+        var index = game.exit(uid);
+
+        faf.module('faf.auth').setBySocketId(socket.id, 'index', null);
+
         callback(null, {
           uid: null
         });
 
         if (index !== null) {
           if (game.state.winner !== null) {
-            this.deferReset(game);
+            deferReset(game);
           }
-          this.setState(game);
+          setState(game);
+          setGamesList();
         }
-      }.bind(this));
-    } catch (err) {
-      callback(err);
-    }
-  },
-
-  getDefaultConfig: function(socket, callback) {
-    callback(null, {
-      config: faf.model('game').getDefaultConfig()
-    })
-  },
-
-  getGamesList: function(socket, callback) {
-    callback(null, {
-      games: this.getInactiveGames()
-    });
-  },
-
-  /**
-   * On get state event
-   * @param {Socket} socket Socket
-   * @param {function(?string, Object)} callback Event callback
-   * @param {Object} data Event data
-   */
-  getState: function(socket, callback, data) {
-    try {
-      var game = this.games[data.gameId];
-      if (!game) {
-        throw 'Game not exists';
+      } catch (err) {
+        callback(err);
       }
+    },
 
+    /**
+     * On get default config event
+     * @param {Socket} socket Socket
+     * @param {function(?string, Object)} callback Event callback
+     */
+    getDefaultConfig: function(socket, callback) {
       callback(null, {
-        config: game.config,
-        state: game.state
+        config: faf.model('game').getDefaultConfig()
+      })
+    },
+
+    /**
+     * On get games list event
+     * @param {Socket} socket Socket
+     * @param {function(?string, Object)} callback Event callback
+     */
+    getGamesList: function(socket, callback) {
+      callback(null, {
+        games: getJoinableGames()
       });
-    } catch (err) {
-      callback(err);
-    }
-  },
+    },
 
-  /**
-   * On join event
-   * @param {Socket} socket Socket
-   * @param {function(?string, Object)} callback Event callback
-   * @param {Object} data Event data
-   */
-  join: function(socket, callback, data) {
-    try {
-      var game = this.games[data.gameId];
-      if (!game) {
-        throw 'Game not exists';
-      }
+    /**
+     * On get state event
+     * @param {Socket} socket Socket
+     * @param {function(?string, Object)} callback Event callback
+     * @param {Object} data Event data
+     */
+    getState: function(socket, callback, data) {
+      try {
+        var game = games[data.gameId];
+        if (!game) {
+          throw 'Game not exists';
+        }
 
-      var index = game.join(socket.id);
-      if (index === null) {
-        throw 'Game is full';
-      }
-
-      socket.set('index', index, function() {
         callback(null, {
-          uid: socket.id
+          config: game.config,
+          state: game.state
+        });
+      } catch (err) {
+        callback(err);
+      }
+    },
+
+    /**
+     * On join event
+     * @param {Socket} socket Socket
+     * @param {function(?string, Object)} callback Event callback
+     * @param {Object} data Event data
+     */
+    join: function(socket, callback, data) {
+      try {
+        var game = games[data.gameId];
+        if (!game) {
+          throw 'Game not exists';
+        }
+
+        var uid = faf.module('faf.auth').getUserId(socket.id);
+
+        var index = game.join(uid);
+        if (index === null) {
+          throw 'Game is full';
+        }
+
+        faf.module('faf.auth').setBySocketId(socket.id, 'index', index);
+
+        callback(null, {
+          uid: uid
         });
 
-        this.setState(game);
-      }.bind(this));
-    } catch (err) {
-      callback(err);
+        setState(game);
+        setGamesList();
+      } catch (err) {
+        callback(err);
+      }
     }
   }
 };

@@ -4,15 +4,15 @@
     <form class="form-inline">
       <label>Players:</label>
       <div class="form-group">
-        <input class="form-control input-short" ng-model="model.state.config.players" disabled type="text">
+        <input class="form-control input-short" ng-model="model.config.players" disabled type="text">
       </div>
       <label>Size:</label>
       <div class="form-group">
-        <input class="form-control input-short" ng-model="model.state.config.size" disabled type="text">
+        <input class="form-control input-short" ng-model="model.config.size" disabled type="text">
       </div>
       <label>Walls:</label>
       <div class="form-group">
-        <input class="form-control input-short" ng-model="model.state.config.walls" disabled type="text">
+        <input class="form-control input-short" ng-model="model.config.walls" disabled type="text">
       </div>
       <button class="btn btn-primary" ng-click="join()" ng-show="isJoinable()">Join</button>
       <button class="btn btn-danger" ng-click="exit()" ng-show="isExitable()">Exit</button>
@@ -35,10 +35,10 @@
     </div>
   </div>
 
-  <div class="field pull-left" ng-show="model.state.config.size > 0">
-    <div ng-repeat="row in [] | range:model.state.config.size">
+  <div class="field pull-left" ng-show="model.config.size > 0">
+    <div ng-repeat="row in [] | range:model.config.size">
       <div class="clearfix">
-        <div class="pull-left" ng-repeat="col in [] | range:model.state.config.size">
+        <div class="pull-left" ng-repeat="col in [] | range:model.config.size">
           <div
             class="cell pull-left"
             ng-class="{
@@ -63,12 +63,12 @@
             ng-click="build(row, col, Directions.VERTICAL)"
             ng-mouseenter="hoverWall(row, col, Directions.VERTICAL)"
             ng-mouseleave="unhoverWall()"
-            ng-show="col < model.state.config.size - 1"
+            ng-show="col < model.config.size - 1"
           ></div>
         </div>
       </div>
-      <div class="clearfix" ng-show="row < model.state.config.size - 1">
-        <div class="pull-left" ng-repeat="col in [] | range:model.state.config.size">
+      <div class="clearfix" ng-show="row < model.config.size - 1">
+        <div class="pull-left" ng-repeat="col in [] | range:model.config.size">
           <div
             class="wall wall-horizontal pull-left"
             ng-class="{
@@ -85,7 +85,7 @@
               hovered: isWallHovered(row, col, Directions.CENTER),
               'wall-filled': isWall(row, col, Directions.CENTER)
             }"
-            ng-show="col < model.state.config.size - 1"
+            ng-show="col < model.config.size - 1"
           ></div>
         </div>
       </div>

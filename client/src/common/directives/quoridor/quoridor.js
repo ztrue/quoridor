@@ -9,7 +9,9 @@ angular
     return {
       restrict: 'E',
       templateUrl: '/common/directives/quoridor/quoridor.tpl.html',
-      scope: {},
+      scope: {
+        gameId: '='
+      },
       link: function(scope) {
         /**
          * Available commands
@@ -50,21 +52,12 @@ angular
           }
         };
 
-        /**
-         * Game model
-         * @type {State}
-         */
-        scope.model = {
+        scope.reset = function() {
           /**
-           * Game state
+           * Game model
            * @type {Object}
            */
-          state: {
-            /**
-             * Active player index
-             * @type {?number}
-             */
-            activePlayer: null,
+          scope.model = {
             /**
              * Game config
              * @type {Object}
@@ -87,69 +80,96 @@ angular
               walls: 0
             },
             /**
-             * Is game in progress
-             * @type {boolean}
+             * Hovered cell and wall
+             * @type {Object}
              */
-            inProgress: false,
-            /**
-             * Players on field
-             * @type {Array.<Player>}
-             * @schema {
-             *   finish: {
-             *     col: ?number,
-             *     row: ?number
-             *   },
-             *   index: number,
-             *   position: {
-             *     col: ?number,
-             *     row: ?number
-             *   },
-             *   uid: ?string,
-             *   walls: number
-             * }
-             */
-            players: [],
-            /**
-             * Walls on field
-             * @type {Object.<string, Array.<Position>>}
-             * @schema {
-             *   col: number,
-             *   row: number
-             * }
-             */
-            walls: {},
-            /**
-             * Winner index
-             * @type {?number}
-             */
-            winner: null
-          },
-          /**
-           * Hovered cell and wall
-           * @type {Object}
-           */
-          hovered: {
-            cell: {
-              col: null,
-              row: null
+            hovered: {
+              cell: {
+                col: null,
+                row: null
+              },
+              wall: {
+                col: null,
+                direction: null,
+                row: null
+              }
             },
-            wall: {
-              col: null,
-              direction: null,
-              row: null
-            }
-          },
-          /**
-           * Current user UID
-           * @type {?string}
-           */
-          uid: null
-        };
+            /**
+             * Game state
+             * @type {State}
+             */
+            state: {
+              /**
+               * Active player index
+               * @type {?number}
+               */
+              activePlayer: null,
+              /**
+               * Is game in progress
+               * @type {boolean}
+               */
+              inProgress: false,
+              /**
+               * Players on field
+               * @type {Array.<Player>}
+               * @schema {
+               *   finish: {
+               *     col: ?number,
+               *     row: ?number
+               *   },
+               *   index: number,
+               *   position: {
+               *     col: ?number,
+               *     row: ?number
+               *   },
+               *   uid: ?string,
+               *   walls: number
+               * }
+               */
+              players: [],
+              /**
+               * Walls on field
+               * @type {Object.<string, Array.<Position>>}
+               * @schema {
+               *   col: number,
+               *   row: number
+               * }
+               */
+              walls: {},
+              /**
+               * Winner index
+               * @type {?number}
+               */
+              winner: null
+            },
+            /**
+             * Current user UID
+             * @type {?string}
+             */
+            uid: null
+          };
 
-        // init walls directions
-        angular.forEach(scope.Directions, function(direction) {
-          scope.model.state.walls[direction] = [];
-        });
+          // init walls directions
+          angular.forEach(scope.Directions, function(direction) {
+            scope.model.state.walls[direction] = [];
+          });
+
+          if (scope.gameId) {
+            var data = {
+              gameId: scope.gameId
+            };
+
+            // load state
+            $comet.emit(scope.Events.client.GET_STATE, data, function(err, data) {
+              if (err) {
+                scope.gameId = null;
+              } else {
+                scope.setConfig(data.config);
+                scope.setState(data.state);
+              }
+            });
+          }
+        };
 
         /**
          * Init game
@@ -157,19 +177,31 @@ angular
         scope.init = function() {
           $comet
             .connect()
-            // load state
-            .emit(scope.Events.client.GET_STATE, function(err, data) {
-              if (!err) {
-                scope.setState(data.state);
+            // listen events
+            .on(scope.Events.server.RESET_UID, function(data) {
+              if (data.gameId === scope.gameId) {
+                scope.model.uid = null;
               }
             })
-            // listen events
-            .on(scope.Events.server.RESET_UID, function() {
-              scope.model.uid = null;
-            })
             .on(scope.Events.server.SET_STATE, function(data) {
-              scope.setState(data.state);
+              if (data.gameId === scope.gameId) {
+                scope.setState(data.state);
+              }
             });
+
+          scope.$watch('gameId', function(gameIdNew, gameIdOld) {
+            scope.reset();
+
+            if (gameIdOld) {
+              scope.exit(gameIdOld);
+            }
+          });
+
+          scope.reset();
+        };
+
+        scope.setConfig = function(config) {
+          scope.model.config = config;
         };
 
         /**
@@ -184,7 +216,11 @@ angular
          * Join game
          */
         scope.join = function() {
-          $comet.emit(scope.Events.client.JOIN, function(err, data) {
+          var data = {
+            gameId: scope.gameId
+          };
+
+          $comet.emit(scope.Events.client.JOIN, data, function(err, data) {
             if (!err) {
               scope.model.uid = data.uid;
             }
@@ -193,9 +229,16 @@ angular
 
         /**
          * Exit from game
+         * @param {string=} opt_gameId Game ID to exit
          */
-        scope.exit = function() {
-          $comet.emit(scope.Events.client.EXIT, function(err) {
+        scope.exit = function(opt_gameId) {
+          opt_gameId = opt_gameId || scope.gameId
+
+          var data = {
+            gameId: opt_gameId
+          };
+
+          $comet.emit(scope.Events.client.EXIT, data, function(err) {
             if (!err) {
               scope.model.uid = null;
             }
@@ -210,6 +253,7 @@ angular
         scope.command = function(command, data) {
           data = data || {};
           data.command = command;
+          data.gameId = scope.gameId;
           $comet.emit(scope.Events.client.COMMAND, data);
         };
 
@@ -223,6 +267,7 @@ angular
           scope.command(scope.Commands.BUILD, {
             col: col,
             direction: direction,
+            gameId: scope.gameId,
             row: row
           });
         };
@@ -235,6 +280,7 @@ angular
         scope.move = function(row, col) {
           scope.command(scope.Commands.MOVE, {
             col: col,
+            gameId: scope.gameId,
             row: row
           });
         };
@@ -243,7 +289,9 @@ angular
          * Skip turn
          */
         scope.skip = function() {
-          scope.command(scope.Commands.SKIP);
+          scope.command(scope.Commands.SKIP, {
+            gameId: scope.gameId
+          });
         };
 
         /**

@@ -22,7 +22,7 @@ module.exports = {
    * @const {number}
    */
   WALLS_MIN: 0,
-  WALLS_MAX: 100,
+  WALLS_MAX: 99,
   WALLS_DEFAULT: 10,
 
   /**
@@ -228,6 +228,8 @@ module.exports = {
         },
         walls: this.config.walls
       });
+
+      this.state.players.push(player);
     }
   },
 
@@ -248,7 +250,7 @@ module.exports = {
    */
   join: function(uid) {
     var index = this.addPlayer(uid);
-    if (index !== null && this.isFull()) {
+    if (this.isFull()) {
       this.start();
     }
     return index;
@@ -324,33 +326,33 @@ module.exports = {
    */
   addPlayer: function(uid) {
     if (this.state.inProgress) {
-      return null;
+      throw 'Game already in progress';
     }
 
     var emptyIndex = null;
 
-    var players = this.state.players;
-
-    for (var index in players) {
-      if (players.hasOwnProperty(index)) {
-        if (players[index].uid === uid) {
-          // player already exists
-          return null;
-        } else if (emptyIndex === null && players[index].uid === null) {
-          emptyIndex = index;
-        }
+    _(this.state.players).each(function(player, index) {
+      if (player.uid === uid) {
+        // player already exists
+        throw 'Player already exists';
       }
+
+      if (emptyIndex === null && player.uid === null) {
+        emptyIndex = index;
+      }
+    }.bind(this));
+
+    if (emptyIndex === null) {
+      throw 'Game is full';
     }
 
-    if (emptyIndex !== null) {
-      players[emptyIndex].set({
-        uid: uid,
-        position: {
-          col: this.positions.start[emptyIndex].col,
-          row: this.positions.start[emptyIndex].row
-        }
-      });
-    }
+    this.state.players[emptyIndex].set({
+      uid: uid,
+      position: {
+        col: this.positions.start[emptyIndex].col,
+        row: this.positions.start[emptyIndex].row
+      }
+    });
 
     return emptyIndex;
   },
@@ -400,7 +402,6 @@ module.exports = {
   /**
    * Execute command
    * @param {Object} data Command data
-   * @returns {boolean} Success
    */
   command: function(data) {
     var row = parseInt(data.row || 0, 10);
@@ -408,16 +409,18 @@ module.exports = {
 
     switch (data.command) {
       case this.Commands.BUILD:
-        return this.build(this.state.activePlayer, row, col, data.direction);
+        this.build(this.state.activePlayer, row, col, data.direction);
+        break;
 
       case this.Commands.MOVE:
-        return this.move(this.state.activePlayer, row, col);
+        this.move(this.state.activePlayer, row, col);
+        break;
 
       case this.Commands.SKIP:
-        return true;
+        break;
 
       default:
-        return false;
+        throw 'Invalid command';
     }
   },
 
@@ -427,7 +430,6 @@ module.exports = {
    * @param {number} row
    * @param {number} col
    * @param {Directions} direction
-   * @returns {boolean} Success
    */
   build: function(index, row, col, direction) {
     var player = this.state.players[index];
@@ -453,15 +455,15 @@ module.exports = {
       this.Directions.VERTICAL
     ].indexOf(direction) >= 0;
 
-    if (player.walls > 0 &&
-      isValidDirection &&
-      this.isValidPosition(row, col, true, direction) &&
-      this.isValidPosition(nearbyRow, nearbyCol, true, direction) &&
-      this.isValidPosition(row, col, true, this.Directions.CENTER) &&
-      this.isEmptyWall(row, col, direction) &&
-      this.isEmptyWall(nearbyRow, nearbyCol, direction) &&
-      this.isEmptyWall(row, col, this.Directions.CENTER) &&
-      this.checkWay([
+    if (player.walls === 0 ||
+      !isValidDirection ||
+      !this.isValidPosition(row, col, true, direction) ||
+      !this.isValidPosition(nearbyRow, nearbyCol, true, direction) ||
+      !this.isValidPosition(row, col, true, this.Directions.CENTER) ||
+      !this.isEmptyWall(row, col, direction) ||
+      !this.isEmptyWall(nearbyRow, nearbyCol, direction) ||
+      !this.isEmptyWall(row, col, this.Directions.CENTER) ||
+      !this.checkWay([
         {
           col: col,
           direction: direction,
@@ -479,25 +481,23 @@ module.exports = {
         }
       ])
     ) {
-      this.state.walls[direction].push({
-        col: col,
-        row: row
-      });
-      this.state.walls[this.Directions.CENTER].push({
-        col: col,
-        row: row
-      });
-      this.state.walls[direction].push({
-        col: nearbyCol,
-        row: nearbyRow
-      });
-
-      player.walls--;
-
-      return true;
+      throw 'Incorrect build';
     }
 
-    return false;
+    this.state.walls[direction].push({
+      col: col,
+      row: row
+    });
+    this.state.walls[this.Directions.CENTER].push({
+      col: col,
+      row: row
+    });
+    this.state.walls[direction].push({
+      col: nearbyCol,
+      row: nearbyRow
+    });
+
+    player.walls--;
   },
 
   /**
@@ -505,7 +505,6 @@ module.exports = {
    * @param {number} index Player index
    * @param {number} row
    * @param {number} col
-   * @returns {boolean} Success
    */
   move: function(index, row, col) {
     var position = this.state.players[index].position;
@@ -514,17 +513,15 @@ module.exports = {
     var isHop = this.isHop(row, col, position);
     var isDiagonalHop = this.isDiagonalHop(row, col, position);
 
-    if (this.isValidPosition(row, col) &&
-      this.isEmptyCell(row, col) &&
-      (isDirectMove || isHop || isDiagonalHop)
+    if (!this.isValidPosition(row, col) ||
+      !this.isEmptyCell(row, col) ||
+      !isDirectMove && !isHop && !isDiagonalHop
     ) {
-      position.row = row;
-      position.col = col;
-
-      return true;
+      throw 'Incorrect move';
     }
 
-    return false;
+    position.row = row;
+    position.col = col;
   },
 
   /**
