@@ -14,7 +14,7 @@ module.exports = {
    * @const {number}
    */
   SIZE_MIN: 3,
-  SIZE_MAX: 99,
+  SIZE_MAX: 15,
   SIZE_DEFAULT: 9,
 
   /**
@@ -22,7 +22,7 @@ module.exports = {
    * @const {number}
    */
   WALLS_MIN: 0,
-  WALLS_MAX: 99,
+  WALLS_MAX: 50,
   WALLS_DEFAULT: 10,
 
   /**
