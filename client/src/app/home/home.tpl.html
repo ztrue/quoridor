@@ -3,13 +3,28 @@
   <div class="well">
     <form class="form-inline">
       <span class="icon-user icon-large" title="Players"></span>
-      <input class="form-control input-short margin-right" ng-model="model.form.data.players" type="text">
+      <input
+        class="form-control input-short margin-right-1"
+        maxlength="2"
+        ng-model="model.form.data.players"
+        type="text"
+      >
 
       <span class="icon-th icon-large" title="Size"></span>
-      <input class="form-control input-short margin-right" ng-model="model.form.data.size" type="text">
+      <input
+        class="form-control input-short margin-right-1"
+        maxlength="2"
+        ng-model="model.form.data.size"
+        type="text"
+      >
 
-      <span class="icon-align-justify icon-large" title="Walls"></span>
-      <input class="form-control input-short margin-right" ng-model="model.form.data.walls" type="text">
+      <span class="icon-reorder icon-large" title="Walls"></span>
+      <input
+        class="form-control input-short margin-right-1"
+        maxlength="2"
+        ng-model="model.form.data.walls"
+        type="text"
+      >
 
       <button class="btn btn-primary" ng-click="create()">Create</button>
     </form>
@@ -25,7 +40,7 @@
         <span class="icon-th"></span>
         <span ng-bind="game.config.size"></span></span>
       <span class="label label-danger" title="Walls">
-        <span class="icon-align-justify"></span>
+        <span class="icon-reorder"></span>
         <span ng-bind="game.config.walls"></span></span>
       <button class="btn btn-primary" ng-click="open(game.id)">Open</button>
     </h3>

@@ -29,6 +29,7 @@ $meBackground: #ccc;
   border-left-color: $player1Background;
   border-bottom-color: $player2Background;
   border-top-color: $player3Background;
+  margin: auto;
 
   .cell {
     background: $cellBackground;

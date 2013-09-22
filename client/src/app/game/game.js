@@ -71,18 +71,23 @@ angular
            * Number of players
            * @type {number}
            */
-          players: 0,
+          players: null,
           /**
            * Field size
            * @type {number}
            */
-          size: 0,
+          size: null,
           /**
            * Number of walls, each player has
            * @type {number}
            */
-          walls: 0
+          walls: null
         },
+        /**
+         * Show game details
+         * @type {boolean}
+         */
+        details: false,
         /**
          * Game ID
          * @type {string}
@@ -305,6 +310,13 @@ angular
     };
 
     /**
+     * Toggle show details
+     */
+    $scope.toggleDetails = function() {
+      $scope.model.details = !$scope.model.details;
+    };
+
+    /**
      * Is current user turn
      * @returns {boolean}
      */
@@ -475,5 +487,20 @@ angular
     $scope.isActivePlayer = function(row, col) {
       var index = $scope.getPlayerIndex(row, col);
       return index !== null && index === $scope.model.state.activePlayer;
+    };
+
+    /**
+     * Count joined players
+     */
+    $scope.countJoinedPlayers = function() {
+      var counter = 0;
+
+      $scope.model.state.players.forEach(function(player) {
+        if (player.uid) {
+          counter++;
+        }
+      });
+
+      return counter;
     };
   });

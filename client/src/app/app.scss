@@ -14,9 +14,13 @@ h6 {
 }
 
 .input-short {
-  width: 50px;
+  width: 45px;
 }
 
-.margin-right {
-  margin-right: 10px;
+@for $i from 0 through 4 {
+  @each $side in top, right, bottom, left {
+    .margin-#{$side}-#{$i} {
+      margin-#{$side}: 5px * $i;
+    }
+  }
 }
