@@ -62,17 +62,17 @@ angular
            * Number of players
            * @type {string}
            */
-          players: '0',
+          players: '',
           /**
            * Field size
            * @type {string}
            */
-          size: '0',
+          size: '',
           /**
            * Number of walls for each player
            * @type {string}
            */
-          walls: '0'
+          walls: ''
         },
         /**
          * Form error
