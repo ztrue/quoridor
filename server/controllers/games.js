@@ -33,7 +33,7 @@ function createGame(config) {
  */
 function generateGameId() {
   do {
-    var gameId = Math.random().toString().replace(/^0\./, '_');
+    var gameId = Math.random().toString().replace(/^0\./, '');
   } while(!gameId || games[gameId]);
 
   return gameId;
