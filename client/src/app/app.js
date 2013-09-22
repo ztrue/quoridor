@@ -8,8 +8,7 @@ angular
   .config(function($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise('/home');
   })
-  .run(function(titleService) {
-    titleService.setSuffix(' | ' + titleService.getTitle());
+  .run(function($title) {
+    $title.setSuffix(' | ' + $title.getTitle());
   })
-  .controller('AppCtrl', function($scope, $location) {
-  });
+  .controller('AppCtrl', function() {});

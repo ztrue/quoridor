@@ -2,8 +2,7 @@ angular
   .module('quoridor.game', [
     'quoridor.quoridor',
     'faf',
-    'ui.router.state',
-    'titleService'
+    'ui.router.state'
   ])
   .config(function($stateProvider) {
     $stateProvider.state('game', {
@@ -16,8 +15,8 @@ angular
       }
     });
   })
-  .controller('GameCtrl', function($scope, titleService, $stateParams, $state) {
-    titleService.setTitle('Game');
+  .controller('GameCtrl', function($scope, $title, $comet, $state, $stateParams) {
+    $title.setTitle('Game');
 
     $scope.model = {
       gameId: $stateParams.gameId

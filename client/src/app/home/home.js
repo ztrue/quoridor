@@ -1,8 +1,7 @@
 angular
   .module('quoridor.home', [
     'faf',
-    'ui.router.state',
-    'titleService'
+    'ui.router.state'
   ])
   .config(function($stateProvider) {
     $stateProvider.state('home', {
@@ -15,8 +14,8 @@ angular
       }
     });
   })
-  .controller('HomeCtrl', function($scope, titleService, $comet, $state) {
-    titleService.setTitle('Home');
+  .controller('HomeCtrl', function($scope, $title, $comet, $state) {
+    $title.setTitle('Home');
 
     /**
      * Available events
