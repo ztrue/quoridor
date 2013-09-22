@@ -1,5 +1,6 @@
 angular
   .module('quoridor', [
+    'quoridor.game',
     'quoridor.home',
     'faf',
     'ui.router.state'
@@ -8,7 +9,7 @@ angular
     $urlRouterProvider.otherwise('/home');
   })
   .run(function(titleService) {
-    titleService.setSuffix(' | quoridor');
+    titleService.setSuffix(' | ' + titleService.getTitle());
   })
   .controller('AppCtrl', function($scope, $location) {
   });

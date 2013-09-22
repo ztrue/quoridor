@@ -1,1 +1,35 @@
-<game></game>
+<div ng-init="init()">
+
+  <div class="well">
+    <form class="form-inline">
+      <label>Players:</label>
+      <div class="form-group">
+        <input class="form-control input-short" ng-model="model.form.data.players" type="text">
+      </div>
+      <label>Size:</label>
+      <div class="form-group">
+        <input class="form-control input-short" ng-model="model.form.data.size" type="text">
+      </div>
+      <label>Walls:</label>
+      <div class="form-group">
+        <input class="form-control input-short" ng-model="model.form.data.walls" type="text">
+      </div>
+      <button class="btn btn-primary" ng-click="create()">Create</button>
+    </form>
+    <p class="text-danger" ng-bind="model.form.error" ng-show="model.form.error"></p>
+  </div>
+
+  <div ng-repeat="game in model.games | orderBy:'joinedPlayers':true">
+    <span class="label label-success">
+      <span class="icon-user"></span>
+      <span ng-bind="game.joinedPlayers"></span>/<span ng-bind="game.config.players"></span></span>
+    <span class="label label-primary">
+      <span class="icon-th"></span>
+      <span ng-bind="game.config.size"></span></span>
+    <span class="label label-danger">
+      <span class="icon-align-justify"></span>
+      <span ng-bind="game.config.walls"></span></span>
+    <button class="btn btn-xs btn-default" ng-click="open(game.id)">Open</button>
+  </div>
+
+</div>

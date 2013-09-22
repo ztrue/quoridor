@@ -6,7 +6,8 @@
     "email": "gztrue@gmail.com"
   },
   "dependencies": {
-    "faf": "0.0.1"
+    "faf": "0.0.1",
+    "underscore": "*"
   },
   "repository": {
     "type": "git",
