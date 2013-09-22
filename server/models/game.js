@@ -507,14 +507,15 @@ module.exports = {
    * @param {number} col
    */
   move: function(index, row, col) {
-    var position = this.state.players[index].position;
+    var player = this.state.players[index];
+    var position = player.position;
 
     var isDirectMove = this.isDirectMove(row, col, position);
     var isHop = this.isHop(row, col, position);
     var isDiagonalHop = this.isDiagonalHop(row, col, position);
 
     if (!this.isValidPosition(row, col) ||
-      !this.isEmptyCell(row, col) ||
+      !this.isEmptyCell(row, col) && !player.isFinishCell(row, col) ||
       !isDirectMove && !isHop && !isDiagonalHop
     ) {
       throw 'Incorrect move';

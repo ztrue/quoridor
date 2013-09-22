@@ -21,13 +21,23 @@ module.exports = {
   },
 
   /**
+   * Is cell a finish for player
+   * @param {number} row
+   * @param {number} col
+   * @returns {boolean}
+   */
+  isFinishCell: function(row, col) {
+    var isFinishRow = row !== null && row === this.finish.row;
+    var isFinishCol = col !== null && col === this.finish.col;
+    return isFinishRow || isFinishCol;
+  },
+
+  /**
    * Is player at the finish line
    * @returns {boolean}
    */
   isWinner: function() {
-    var atFinishRow = this.position.row !== null && this.position.row === this.finish.row;
-    var atFinishCol = this.position.col !== null && this.position.col === this.finish.col;
-    return this.uid !== null && (atFinishRow || atFinishCol);
+    return this.isFinishCell(this.position.row, this.position.col);
   },
 
   /**
