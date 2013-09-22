@@ -1,15 +1,18 @@
-$cellSize: 32px;
+$tableFault: 2px;
+
+$cellSize: 30px;
+$cellSizeInner: $cellSize - $tableFault;
 $cellBackground: #eee;
 $cellActiveBackgroudn: #fcc;
 $cellHoveredBackground: #cff;
 
-$wallSize: 8px;
+$wallSize: $cellSize / 3;
 $wallBackground: #ccc;
 $wallFilledBackground: #666;
 $wallHoveredBackground: #cff;
 
-$playerSize: $cellSize * 0.6;
-$playerMargin: ($cellSize - $playerSize) / 2;
+$playerSize: $cellSizeInner * 0.8;
+$playerMargin: ($cellSizeInner - $playerSize) / 2;
 $playerRadius: $playerSize / 2;
 $player0Background: #c00;
 $player1Background: #00c;
@@ -21,6 +24,7 @@ $meBackground: #ccc;
 
 .field {
   border: solid $wallSize;
+  border-collapse: separate;
   border-right-color: $player0Background;
   border-left-color: $player1Background;
   border-bottom-color: $player2Background;
@@ -89,6 +93,10 @@ $meBackground: #ccc;
 .stats {
   .item {
     margin-bottom: $wallSize;
+
+    .player {
+      margin-right: $playerMargin + $wallSize + $tableFault;
+    }
 
     .wall {
       margin-right: $wallSize;
