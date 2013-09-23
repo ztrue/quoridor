@@ -126,30 +126,13 @@ angular
           /**
            * Players on field
            * @type {Array.<Player>}
-           * @schema {
-               *   finish: {
-               *     col: ?number,
-               *     row: ?number
-               *   },
-               *   index: number,
-               *   position: {
-               *     col: ?number,
-               *     row: ?number
-               *   },
-               *   uid: ?string,
-               *   walls: number
-               * }
            */
           players: [],
           /**
            * Walls on field
-           * @type {Object.<string, Array.<Position>>}
-           * @schema {
-               *   col: number,
-               *   row: number
-               * }
+           * @type {Array.<Wall>}
            */
-          walls: {},
+          walls: [],
           /**
            * Winner index
            * @type {?number}
@@ -162,11 +145,6 @@ angular
          */
         uid: null
       };
-
-      // init walls directions
-      angular.forEach($scope.Directions, function(direction) {
-        $scope.model.state.walls[direction] = [];
-      });
 
       if ($scope.model.gameId) {
         var data = {
@@ -336,8 +314,8 @@ angular
     $scope.isWall = function(row, col, direction) {
       var exists = false;
 
-      angular.forEach($scope.model.state.walls[direction], function(wall) {
-        exists = exists || wall.row === row && wall.col === col;
+      angular.forEach($scope.model.state.walls, function(wall) {
+        exists = exists || wall.row === row && wall.col === col && wall.direction === direction;
       });
 
       return exists;
