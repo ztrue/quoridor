@@ -65,7 +65,7 @@ function resetSockets(game) {
 
   // TODO reset UID only for passed game
   uids.forEach(function(uid) {
-    faf.module('faf.auth').set(uid, 'index', null);
+    faf.module('auth').set(uid, 'index', null);
   });
 
   module.exports.client.resetUid(null, {
@@ -149,7 +149,7 @@ module.exports = {
           throw 'Game does not exists';
         }
 
-        var index = faf.module('faf.auth').getBySocketId(socket.id, 'index');
+        var index = faf.module('auth').getBySocketId(socket.id, 'index');
         // TODO check by UID, not by index
         // TODO check at game model, not here
         if (index === null || game.state.activePlayer !== index) {
@@ -184,7 +184,7 @@ module.exports = {
      */
     connection: function(socket) {
       // uid is equal to socket ID
-      faf.module('faf.auth').bind(socket.id, socket.id);
+      faf.module('auth').bind(socket.id, socket.id);
     },
 
     /**
@@ -223,7 +223,7 @@ module.exports = {
      * @param {Socket} socket Socket
      */
     disconnect: function(socket) {
-      var uid = faf.module('faf.auth').getUserId(socket.id);
+      var uid = faf.module('auth').getUserId(socket.id);
 
       _(games).each(function(game) {
         var index = game.exit(uid);
@@ -251,11 +251,11 @@ module.exports = {
           throw 'Game not exists';
         }
 
-        var uid = faf.module('faf.auth').getUserId(socket.id);
+        var uid = faf.module('auth').getUserId(socket.id);
 
         var index = game.exit(uid);
 
-        faf.module('faf.auth').setBySocketId(socket.id, 'index', null);
+        faf.module('auth').setBySocketId(socket.id, 'index', null);
 
         callback(null, {
           uid: null
@@ -330,14 +330,14 @@ module.exports = {
           throw 'Game not exists';
         }
 
-        var uid = faf.module('faf.auth').getUserId(socket.id);
+        var uid = faf.module('auth').getUserId(socket.id);
 
         var index = game.join(uid);
         if (index === null) {
           throw 'Game is full';
         }
 
-        faf.module('faf.auth').setBySocketId(socket.id, 'index', index);
+        faf.module('auth').setBySocketId(socket.id, 'index', index);
 
         callback(null, {
           uid: uid
