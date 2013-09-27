@@ -6,28 +6,19 @@ module.exports = {
     this.index = null;
     this.uid = null;
     this.walls = 0;
-    this.position = {
-      col: null,
-      row: null
-    };
-    this.finish = {
-      col: null,
-      row: null
-    };
+    this.position = this.model('position').new();
+    this.finish = this.model('position').new();
 
     this.set(opt_data);
   },
 
   /**
    * Is cell a finish for player
-   * @param {number} row
-   * @param {number} col
+   * @param {Position} position
    * @returns {boolean}
    */
-  isFinishCell: function(row, col) {
-    var isFinishRow = row !== null && row === this.finish.row;
-    var isFinishCol = col !== null && col === this.finish.col;
-    return isFinishRow || isFinishCol;
+  isFinishCell: function(position) {
+    return this.finish.isFinish(position);
   },
 
   /**
@@ -35,18 +26,16 @@ module.exports = {
    * @returns {boolean}
    */
   isWinner: function() {
-    return this.isFinishCell(this.position.row, this.position.col);
+    return this.isFinishCell(this.position);
   },
 
   /**
    * Reset player user data
    */
   reset: function() {
+    this.position.reset();
+
     this.set({
-      position: {
-        col: null,
-        row: null
-      },
       uid: null
     });
   }

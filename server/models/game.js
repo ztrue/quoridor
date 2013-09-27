@@ -108,44 +108,40 @@ module.exports = {
        * @type {Array.<Position>}
        */
       finish: [
-        {
-          col: maxCell,
-          row: null
-        },
-        {
-          col: 0,
-          row: null
-        },
-        {
-          col: null,
+        this.model('position').new({
+          col: maxCell
+        }),
+        this.model('position').new({
+          col: 0
+        }),
+        this.model('position').new({
           row: maxCell
-        },
-        {
-          col: null,
+        }),
+        this.model('position').new({
           row: 0
-        }
+        })
       ],
       /**
        * Players start positions
        * @type {Array.<Position>}
        */
       start: [
-        {
+        this.model('position').new({
           col: 0,
           row: middleCell
-        },
-        {
+        }),
+        this.model('position').new({
           col: maxCell,
           row: middleCell
-        },
-        {
+        }),
+        this.model('position').new({
           col: middleCell,
           row: 0
-        },
-        {
+        }),
+        this.model('position').new({
           col: middleCell,
           row: maxCell
-        }
+        })
       ]
     };
   },
@@ -201,12 +197,9 @@ module.exports = {
    */
   resetPlayers: function() {
     for (var i = 0; i < this.config.players; i++) {
-      var player = faf.model('player').new({
+      var player = this.model('player').new({
         index: i,
-        finish: {
-          col: this.positions.finish[i].col,
-          row: this.positions.finish[i].row
-        },
+        finish: this.positions.finish[i],
         walls: this.config.walls
       });
 
@@ -246,12 +239,9 @@ module.exports = {
     var index = this.removePlayer(uid);
     if (index !== null) {
       var player = this.state.players[index];
-      player.uid = null;
+      player.reset();
 
       if (this.state.inProgress) {
-        player.position.row = null;
-        player.position.col = null;
-
         // if only one player left
         if (this.countPlayers() === 1) {
           this.state.activePlayer = null;
@@ -312,7 +302,7 @@ module.exports = {
 
     var emptyIndex = null;
 
-    _(this.state.players).each(function(player, index) {
+    this.state.players.forEach(function(player, index) {
       if (player.uid === uid) {
         // player already exists
         throw 'Player already exists';
@@ -329,10 +319,7 @@ module.exports = {
 
     this.state.players[emptyIndex].set({
       uid: uid,
-      position: {
-        col: this.positions.start[emptyIndex].col,
-        row: this.positions.start[emptyIndex].row
-      }
+      position: this.positions.start[emptyIndex].clone()
     });
 
     return emptyIndex;
@@ -385,16 +372,13 @@ module.exports = {
    * @param {Object} data Command data
    */
   command: function(data) {
-    var row = parseInt(data.row || 0, 10);
-    var col = parseInt(data.col || 0, 10);
-
     switch (data.command) {
       case this.Commands.BUILD:
-        this.build(this.state.activePlayer, row, col, data.direction);
+        this.build(this.state.activePlayer, this.model('wall').new(data.wall));
         break;
 
       case this.Commands.MOVE:
-        this.move(this.state.activePlayer, row, col);
+        this.move(this.state.activePlayer, this.model('position').new(data.position));
         break;
 
       case this.Commands.SKIP:
@@ -408,78 +392,56 @@ module.exports = {
   /**
    * Build a wall
    * @param {number} index Player index
-   * @param {number} row
-   * @param {number} col
-   * @param {Directions} direction
+   * @param {Wall} wall
    */
-  build: function(index, row, col, direction) {
+  build: function(index, wall) {
     var player = this.state.players[index];
 
     // second cell where wall also will be build
-    var nearbyRow = null;
-    var nearbyCol = null;
+    var nearbyPosition = null;
 
-    switch (direction) {
-      case faf.model('wall').Directions.HORIZONTAL:
-        nearbyRow = row;
-        nearbyCol = col + 1;
+    switch (wall.direction) {
+      case this.model('wall').Directions.HORIZONTAL:
+        nearbyPosition = wall.position.right();
         break;
 
-      case faf.model('wall').Directions.VERTICAL:
-        nearbyRow = row + 1;
-        nearbyCol = col;
+      case this.model('wall').Directions.VERTICAL:
+        nearbyPosition = wall.position.down();
         break;
+
+      default:
+        throw 'Incorrect wall direction: \'' + wall.direction + '\'';
     }
 
-    var isValidDirection = [
-      faf.model('wall').Directions.HORIZONTAL,
-      faf.model('wall').Directions.VERTICAL
-    ].indexOf(direction) >= 0;
+    var nearbyWall = this.model('wall').new({
+      direction: wall.direction,
+      position: nearbyPosition
+    });
+
+    var centerWall = this.model('wall').new({
+      direction: this.model('wall').Directions.CENTER,
+      position: wall.position.clone()
+    });
 
     if (player.walls === 0 ||
-      !isValidDirection ||
-      !this.isValidPosition(row, col, direction) ||
-      !this.isValidPosition(nearbyRow, nearbyCol, direction) ||
-      !this.isValidPosition(row, col, faf.model('wall').Directions.CENTER) ||
-      !this.isEmptyWall(row, col, direction) ||
-      !this.isEmptyWall(nearbyRow, nearbyCol, direction) ||
-      !this.isEmptyWall(row, col, faf.model('wall').Directions.CENTER) ||
+      !this.isValidPosition(wall.position, wall.direction) ||
+      !this.isValidPosition(nearbyWall.position, nearbyWall.direction) ||
+      !this.isValidPosition(centerWall.position, centerWall.direction) ||
+      !this.isEmptyWall(wall.position, wall.direction) ||
+      !this.isEmptyWall(nearbyWall.position, nearbyWall.direction) ||
+      !this.isEmptyWall(centerWall.position, centerWall.direction) ||
       !this.checkWay([
-        {
-          col: col,
-          direction: direction,
-          row: row
-        },
-        {
-          col: col,
-          direction: faf.model('wall').Directions.CENTER,
-          row: row
-        },
-        {
-          col: nearbyCol,
-          direction: direction,
-          row: nearbyRow
-        }
+        wall,
+        centerWall,
+        nearbyWall
       ])
     ) {
       throw 'Incorrect build';
     }
 
-    this.state.walls.push(faf.model('wall').new({
-      col: col,
-      direction: direction,
-      row: row
-    }));
-    this.state.walls.push(faf.model('wall').new({
-      col: col,
-      direction: faf.model('wall').Directions.CENTER,
-      row: row
-    }));
-    this.state.walls.push(faf.model('wall').new({
-      col: nearbyCol,
-      direction: direction,
-      row: nearbyRow
-    }));
+    this.state.walls.push(wall);
+    this.state.walls.push(centerWall);
+    this.state.walls.push(nearbyWall);
 
     player.walls--;
   },
@@ -487,47 +449,43 @@ module.exports = {
   /**
    * Move a player
    * @param {number} index Player index
-   * @param {number} row
-   * @param {number} col
+   * @param {Position} position
    */
-  move: function(index, row, col) {
+  move: function(index, position) {
     var player = this.state.players[index];
-    var position = player.position;
 
-    var isDirectMove = this.isDirectMove(row, col, position);
-    var isHop = this.isHop(row, col, position);
-    var isDiagonalHop = this.isDiagonalHop(row, col, position);
+    var isDirectMove = this.isDirectMove(position, player.position);
+    var isHop = this.isHop(position, player.position);
+    var isDiagonalHop = this.isDiagonalHop(position, player.position);
 
-    if (!this.isValidPosition(row, col) ||
-      !this.isEmptyCell(row, col) && !player.isFinishCell(row, col) ||
+    if (!this.isValidPosition(position) ||
+      !this.isEmptyCell(position) && !player.isFinishCell(position) ||
       !isDirectMove && !isHop && !isDiagonalHop
     ) {
       throw 'Incorrect move';
     }
 
-    position.row = row;
-    position.col = col;
+    player.position = position;
   },
 
   /**
    * Is move a direct (to nearby row or col)
-   * @param {number} row
-   * @param {number} col
    * @param {Position} position
+   * @param {Position} playerPosition
    * @returns {boolean}
    */
-  isDirectMove: function(row, col, position) {
-    var isRowMove = col === position.col && (
-      row === position.row - 1 &&
-        this.isEmptyWall(position.row - 1, position.col, faf.model('wall').Directions.HORIZONTAL) ||
-      row === position.row + 1 &&
-        this.isEmptyWall(position.row, position.col, faf.model('wall').Directions.HORIZONTAL)
+  isDirectMove: function(position, playerPosition) {
+    var isRowMove = position.col === playerPosition.col && (
+      position.row === playerPosition.row - 1 &&
+        this.isEmptyWall(playerPosition.up(), this.model('wall').Directions.HORIZONTAL) ||
+      position.row === playerPosition.row + 1 &&
+        this.isEmptyWall(playerPosition, this.model('wall').Directions.HORIZONTAL)
     );
-    var isColMove = row === position.row && (
-      col === position.col - 1 &&
-        this.isEmptyWall(position.row, position.col - 1, faf.model('wall').Directions.VERTICAL) ||
-      col === position.col + 1 &&
-        this.isEmptyWall(position.row, position.col, faf.model('wall').Directions.VERTICAL)
+    var isColMove = position.row === playerPosition.row && (
+      position.col === playerPosition.col - 1 &&
+        this.isEmptyWall(playerPosition.left(), this.model('wall').Directions.VERTICAL) ||
+      position.col === playerPosition.col + 1 &&
+        this.isEmptyWall(playerPosition, this.model('wall').Directions.VERTICAL)
     );
 
     return isRowMove || isColMove;
@@ -535,31 +493,30 @@ module.exports = {
 
   /**
    * Is move a hop (through other player)
-   * @param {number} row
-   * @param {number} col
    * @param {Position} position
+   * @param {Position} playerPosition
    * @returns {boolean}
    */
-  isHop: function(row, col, position) {
-    var isRowHop = col === position.col && (
-      row === position.row - 2 &&
-        !this.isEmptyCell(position.row - 1, col) &&
-        this.isEmptyWall(position.row - 1, position.col, faf.model('wall').Directions.HORIZONTAL) &&
-        this.isEmptyWall(position.row - 2, position.col, faf.model('wall').Directions.HORIZONTAL) ||
-      row === position.row + 2 &&
-        !this.isEmptyCell(position.row + 1, col) &&
-        this.isEmptyWall(position.row, position.col, faf.model('wall').Directions.HORIZONTAL) &&
-        this.isEmptyWall(position.row + 1, position.col, faf.model('wall').Directions.HORIZONTAL)
+  isHop: function(position, playerPosition) {
+    var isRowHop = position.col === playerPosition.col && (
+      playerPosition.isEquals(position.down(2)) &&
+        !this.isEmptyCell(position.down()) &&
+        this.isEmptyWall(playerPosition.up(), this.model('wall').Directions.HORIZONTAL) &&
+        this.isEmptyWall(playerPosition.up(2), this.model('wall').Directions.HORIZONTAL) ||
+      playerPosition.isEquals(position.up(2)) &&
+        !this.isEmptyCell(position.up()) &&
+        this.isEmptyWall(playerPosition, this.model('wall').Directions.HORIZONTAL) &&
+        this.isEmptyWall(playerPosition.down(), this.model('wall').Directions.HORIZONTAL)
     );
-    var isColHop = row === position.row && (
-      col === position.col - 2 &&
-        !this.isEmptyCell(row, position.col - 1) &&
-        this.isEmptyWall(position.row, position.col - 1, faf.model('wall').Directions.VERTICAL) &&
-        this.isEmptyWall(position.row, position.col - 2, faf.model('wall').Directions.VERTICAL) ||
-      col === position.col + 2 &&
-        !this.isEmptyCell(row, position.col + 1) &&
-        this.isEmptyWall(position.row, position.col, faf.model('wall').Directions.VERTICAL) &&
-        this.isEmptyWall(position.row, position.col + 1, faf.model('wall').Directions.VERTICAL)
+    var isColHop = position.row === playerPosition.row && (
+      playerPosition.isEquals(position.right(2)) &&
+        !this.isEmptyCell(position.right()) &&
+        this.isEmptyWall(playerPosition.left(), this.model('wall').Directions.VERTICAL) &&
+        this.isEmptyWall(playerPosition.left(2), this.model('wall').Directions.VERTICAL) ||
+      playerPosition.isEquals(position.left(2)) &&
+        !this.isEmptyCell(position.left()) &&
+        this.isEmptyWall(playerPosition, this.model('wall').Directions.VERTICAL) &&
+        this.isEmptyWall(playerPosition.right(), this.model('wall').Directions.VERTICAL)
     );
 
     return isRowHop || isColHop;
@@ -567,30 +524,65 @@ module.exports = {
 
   /**
    * Is move a diagonal hop (through other player)
-   * @param {number} row
-   * @param {number} col
    * @param {Position} position
+   * @param {Position} playerPosition
    * @returns {boolean}
    */
-  isDiagonalHop: function(row, col, position) {
-    var rowIncrease = row > position.row;
-    var colIncrease = col > position.col;
-    var isNearbyRow = Math.abs(position.row - row) === 1;
-    var isNearbyCol = Math.abs(position.col - col) === 1;
-    var isPlayerHorizontal = !this.isEmptyCell(position.row, col);
-    var isPlayerVertical = !this.isEmptyCell(row, position.col);
-    var isWayToHorizontal = this.isEmptyWall(position.row, colIncrease ? position.col : col, faf.model('wall').Directions.VERTICAL);
-    var isWayToVertical = this.isEmptyWall(rowIncrease ? position.row : row, position.col, faf.model('wall').Directions.HORIZONTAL);
-    var isWayFromHorizontal = this.isEmptyWall(rowIncrease ? position.row : row, col, faf.model('wall').Directions.HORIZONTAL);
-    var isWayFromVertical = this.isEmptyWall(row, colIncrease ? position.col : col, faf.model('wall').Directions.VERTICAL);
-    var rowBehind = rowIncrease ? row + 1 : row - 1;
-    var colBehind = colIncrease ? col + 1 : col - 1;
-    var isWayBehindHorizontal = this.isValidPosition(position.row, colBehind) &&
-      this.isEmptyCell(position.row, colBehind) &&
-      this.isEmptyWall(position.row, colIncrease ? col : colBehind, faf.model('wall').Directions.VERTICAL);
-    var isWayBehindVertical = this.isValidPosition(rowBehind, position.col) &&
-      this.isEmptyCell(rowBehind, position.col) &&
-      this.isEmptyWall(rowIncrease ? row : rowBehind, position.col, faf.model('wall').Directions.HORIZONTAL);
+  isDiagonalHop: function(position, playerPosition) {
+    var rowIncrease = position.row > playerPosition.row;
+    var colIncrease = position.col > playerPosition.col;
+    var isNearbyRow = Math.abs(playerPosition.row - position.row) === 1;
+    var isNearbyCol = Math.abs(playerPosition.col - position.col) === 1;
+    var isPlayerHorizontal = !this.isEmptyCell(this.model('position').new({
+      col: position.col,
+      row: playerPosition.row
+    }));
+    var isPlayerVertical = !this.isEmptyCell(this.model('position').new({
+      col: playerPosition.col,
+      row: position.row
+    }));
+    var isWayToHorizontal = this.isEmptyWall(this.model('position').new({
+      col: colIncrease ? playerPosition.col : position.col,
+      row: playerPosition.row
+    }), this.model('wall').Directions.VERTICAL);
+    var isWayToVertical = this.isEmptyWall(this.model('position').new({
+      col: playerPosition.col,
+      row: rowIncrease ? playerPosition.row : position.row
+    }), this.model('wall').Directions.HORIZONTAL);
+    var isWayFromHorizontal = this.isEmptyWall(this.model('position').new({
+      col: position.col,
+      row: rowIncrease ? playerPosition.row : position.row
+    }), this.model('wall').Directions.HORIZONTAL);
+    var isWayFromVertical = this.isEmptyWall(this.model('position').new({
+        col: colIncrease ? playerPosition.col : position.col,
+        row: position.row
+    }), this.model('wall').Directions.VERTICAL);
+    var rowBehind = rowIncrease ? position.row + 1 : position.row - 1;
+    var colBehind = colIncrease ? position.col + 1 : position.col - 1;
+    var isWayBehindHorizontal = this.isValidPosition(this.model('position').new({
+        col: colBehind,
+        row: playerPosition.row
+      })) &&
+      this.isEmptyCell(this.model('position').new({
+        col: colBehind,
+        row: playerPosition.row
+      })) &&
+      this.isEmptyWall(this.model('position').new({
+        col: colIncrease ? position.col : colBehind,
+        row: playerPosition.row
+      }), this.model('wall').Directions.VERTICAL);
+    var isWayBehindVertical = this.isValidPosition(this.model('position').new({
+        col: playerPosition.col,
+        row: rowBehind
+      })) &&
+      this.isEmptyCell(this.model('position').new({
+        col: playerPosition.col,
+        row: rowBehind
+      })) &&
+      this.isEmptyWall(this.model('position').new({
+        col: playerPosition.col,
+        row: rowIncrease ? position.row : rowBehind
+      }), this.model('wall').Directions.HORIZONTAL);
 
     return isNearbyRow && isNearbyCol && (
       isPlayerHorizontal && isWayToHorizontal && isWayFromHorizontal && !isWayBehindHorizontal ||
@@ -611,21 +603,16 @@ module.exports = {
         var exists = false;
 
         var cells = [
-          {
-            col: player.position.col,
-            row: player.position.row
-          }
+          player.position
         ];
 
         // get all cells that not separated by walls
         // and check that at least one of those is a finish
         this.getAvailableCells(player.position, walls, cells).forEach(function(cell) {
-          if (player.finish.row !== null && player.finish.row === cell.row ||
-            player.finish.col !== null && player.finish.col === cell.col
-          ) {
+          if (player.isFinishCell(cell)) {
             exists = true;
           }
-        }.bind(this));
+        });
 
         existsAll = exists;
       }
@@ -648,10 +635,10 @@ module.exports = {
       var exists = false;
 
       cells.forEach(function(cell) {
-        if (cell.row === newCell.row && cell.col === newCell.col) {
+        if (cell.isEquals(newCell)) {
           exists = true;
         }
-      }.bind(this));
+      });
 
       if (!exists) {
         cells.push(newCell);
@@ -676,42 +663,30 @@ module.exports = {
 
     // left
     if (position.col > 0 &&
-      this.isEmptyWallAdditional(position.row, position.col - 1, faf.model('wall').Directions.VERTICAL, walls)
+      this.isEmptyWallAdditional(position.left(), this.model('wall').Directions.VERTICAL, walls)
     ) {
-      cells.push({
-        col: position.col - 1,
-        row: position.row
-      });
+      cells.push(position.left());
     }
 
     // right
     if (position.col < maxCol &&
-      this.isEmptyWallAdditional(position.row, position.col, faf.model('wall').Directions.VERTICAL, walls)
+      this.isEmptyWallAdditional(position, this.model('wall').Directions.VERTICAL, walls)
     ) {
-      cells.push({
-        col: position.col + 1,
-        row: position.row
-      });
+      cells.push(position.right());
     }
 
-    // top
+    // up
     if (position.row > 0 &&
-      this.isEmptyWallAdditional(position.row - 1, position.col, faf.model('wall').Directions.HORIZONTAL, walls)
+      this.isEmptyWallAdditional(position.up(), this.model('wall').Directions.HORIZONTAL, walls)
     ) {
-      cells.push({
-        col: position.col,
-        row: position.row - 1
-      });
+      cells.push(position.up());
     }
 
-    // bottom
+    // down
     if (position.row < maxCol &&
-      this.isEmptyWallAdditional(position.row, position.col, faf.model('wall').Directions.HORIZONTAL, walls)
+      this.isEmptyWallAdditional(position, this.model('wall').Directions.HORIZONTAL, walls)
     ) {
-      cells.push({
-        col: position.col,
-        row: position.row + 1
-      });
+      cells.push(position.down());
     }
 
     return cells;
@@ -719,21 +694,20 @@ module.exports = {
 
   /**
    * Check wall is empty and it does not exists at additional walls
-   * @param {number} row
-   * @param {number} col
+   * @param {Position} position
    * @param {Directions} direction
    * @param {Array.<Object>} walls
    * @returns {boolean} Is empty
    */
-  isEmptyWallAdditional: function(row, col, direction, walls) {
-    var isEmpty = this.isEmptyWall(row, col, direction);
+  isEmptyWallAdditional: function(position, direction, walls) {
+    var isEmpty = this.isEmptyWall(position, direction);
 
     if (isEmpty) {
       walls.forEach(function(wall) {
-        if (wall.row === row && wall.col === col && wall.direction === direction) {
+        if (wall.position.isEquals(position) && wall.direction === direction) {
           isEmpty = false;
         }
-      }.bind(this));
+      });
     }
 
     return isEmpty;
@@ -741,62 +715,63 @@ module.exports = {
 
   /**
    * Is valid position
-   * @param {number} row
-   * @param {number} col
+   * @param {Position} position
    * @param {Directions} direction
    * @returns {boolean}
    */
-  isValidPosition: function(row, col, direction) {
+  isValidPosition: function(position, direction) {
     var maxRow = this.config.size - 1;
     var maxCol = this.config.size - 1;
 
-    if (direction === faf.model('wall').Directions.HORIZONTAL) {
+    if (direction === this.model('wall').Directions.HORIZONTAL ||
+      direction === this.model('wall').Directions.CENTER
+    ) {
       maxRow--;
     }
 
-    if (direction === faf.model('wall').Directions.VERTICAL) {
+    if (direction === this.model('wall').Directions.VERTICAL ||
+      direction === this.model('wall').Directions.CENTER
+    ) {
       maxCol--;
     }
 
-    return row >= 0 &&
-      row <= maxRow &&
-      col >= 0 &&
-      col <= maxCol;
+    return position.row >= 0 &&
+      position.row <= maxRow &&
+      position.col >= 0 &&
+      position.col <= maxCol;
   },
 
   /**
    * Is cell empty
-   * @param {number} row
-   * @param {number} col
+   * @param {Position} position
    * @returns {boolean}
    */
-  isEmptyCell: function(row, col) {
+  isEmptyCell: function(position) {
     var isEmpty = true;
 
     this.state.players.forEach(function(player) {
-      if (player.position.row === row && player.position.col === col) {
+      if (player.position.isEquals(position)) {
         isEmpty = false;
       }
-    }.bind(this));
+    });
 
     return isEmpty;
   },
 
   /**
    * Is wall empty
-   * @param {number} row
-   * @param {number} col
+   * @param {Position} position
    * @param {Directions} direction
    * @returns {boolean}
    */
-  isEmptyWall: function(row, col, direction) {
+  isEmptyWall: function(position, direction) {
     var isEmpty = true;
 
     this.state.walls.forEach(function(wall) {
-      if (wall.row === row && wall.col === col && wall.direction === direction) {
+      if (wall.position.isEquals(position) && wall.direction === direction) {
         isEmpty = false;
       }
-    }.bind(this));
+    });
 
     return isEmpty;
   }
