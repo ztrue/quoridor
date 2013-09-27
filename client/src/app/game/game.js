@@ -84,11 +84,6 @@ angular
           walls: null
         },
         /**
-         * Show game details
-         * @type {boolean}
-         */
-        details: false,
-        /**
          * Game ID
          * @type {string}
          */
@@ -278,13 +273,6 @@ angular
     $scope.openGamesList = function() {
       $scope.exit();
       $state.go('home');
-    };
-
-    /**
-     * Toggle show details
-     */
-    $scope.toggleDetails = function() {
-      $scope.model.details = !$scope.model.details;
     };
 
     /**

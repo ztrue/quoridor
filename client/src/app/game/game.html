@@ -1,29 +1,23 @@
 <div ng-init="init()">
 
   <div class="clearfix well">
-    <button class="btn btn-danger pull-left" ng-click="openGamesList()" title="Back to games list">
+    <button class="btn btn-danger pull-left" ng-click="openGamesList()" ng-show="!isExitable()" title="Back to games list">
       <span class="icon-home icon-large"></span>
     </button>
 
-    <button class="btn btn-default pull-left margin-left-4" ng-click="toggleDetails()" title="Details">
-      <span class="icon-ellipsis-horizontal icon-large"></span>
+    <button class="btn btn-danger pull-left" ng-click="exit()" ng-show="isExitable()" title="Exit">
+      Exit
     </button>
 
     <button class="btn btn-primary pull-right" ng-click="join()" ng-show="isJoinable()" title="Join">
       Join
     </button>
 
-    <button class="btn btn-danger pull-right" ng-click="exit()" ng-show="isExitable()" title="Exit">
-      Exit
-    </button>
-
-    <button class="btn btn-warning pull-right margin-right-4" ng-click="skip()" ng-show="isMyTurn()">
+    <button class="btn btn-warning pull-right" ng-click="skip()" ng-show="isMyTurn()">
       Skip
     </button>
-  </div>
 
-  <div class="well" ng-show="model.details">
-    <h3 class="margin-top-0">
+    <h3 class="margin-left-4 margin-top-1 pull-left">
       <span class="label label-success" title="Players">
         <span class="icon-user"></span>
         <span ng-bind="countJoinedPlayers()"></span>/<span ng-bind="model.config.players"></span></span>
