@@ -30,74 +30,84 @@
     </h3>
   </div>
 
-  <div class="stats well">
-    <div
-      class="item"
-      ng-class="{
-        me: isMe(player.index),
-        winner: player.index == model.state.winner
-      }"
-      ng-repeat="player in model.state.players"
-    >
-      <div class="player player-{{player.index}} pull-left"></div>
-      <div class="wall wall-vertical wall-filled pull-left" ng-repeat="wall in [] | range:player.walls"></div>
-      <div class="clearfix"></div>
-    </div>
-  </div>
+  <div class="row">
+    <div class="col-sm-6">
 
-  <table class="field" ng-show="model.config.size > 0">
-    <tr ng-repeat-start="row in [] | range:model.config.size">
-      <td
-        class="cell"
-        ng-class="{
-          active: isActivePlayer(position(row, col)),
-          hovered: isCellHovered(position(row, col))
-        }"
-        ng-click="move(position(row, col))"
-        ng-mouseenter="hoverCell(position(row, col))"
-        ng-mouseleave="unhoverCell()"
-        ng-repeat-start="col in [] | range:model.config.size"
-      >
+      <div class="well">
+        <table class="field" ng-show="model.config.size > 0">
+          <tr ng-repeat-start="row in [] | range:model.config.size">
+            <td
+              class="cell"
+              ng-class="{
+                active: isActivePlayer(position(row, col)),
+                hovered: isCellHovered(position(row, col))
+              }"
+              ng-click="move(position(row, col))"
+              ng-mouseenter="hoverCell(position(row, col))"
+              ng-mouseleave="unhoverCell()"
+              ng-repeat-start="col in [] | range:model.config.size"
+              >
+              <div
+                class="player player-{{getPlayerIndex(position(row, col))}}"
+                ng-show="isJoinedPlayer(position(row, col))"
+                ></div>
+            </td>
+            <td
+              class="wall wall-vertical"
+              ng-class="{
+                hovered: isWallHovered(position(row, col), Directions.VERTICAL),
+                'wall-filled': isWall(position(row, col), Directions.VERTICAL)
+              }"
+              ng-click="build(wall(position(row, col), Directions.VERTICAL))"
+              ng-mouseenter="hoverWall(wall(position(row, col), Directions.VERTICAL))"
+              ng-mouseleave="unhoverWall()"
+              ng-repeat-end
+              ng-show="col < model.config.size - 1"
+              ></td>
+          </tr>
+          <tr ng-repeat-end ng-show="row < model.config.size - 1">
+            <td
+              class="wall wall-horizontal"
+              ng-class="{
+                hovered: isWallHovered(position(row, col), Directions.HORIZONTAL),
+                'wall-filled': isWall(position(row, col), Directions.HORIZONTAL)
+              }"
+              ng-click="build(wall(position(row, col), Directions.HORIZONTAL))"
+              ng-mouseenter="hoverWall(wall(position(row, col), Directions.HORIZONTAL))"
+              ng-mouseleave="unhoverWall()"
+              ng-repeat-start="col in [] | range:model.config.size"
+              ></td>
+            <td
+              class="wall"
+              ng-class="{
+                hovered: isWallHovered(position(row, col), Directions.CENTER),
+                'wall-filled': isWall(position(row, col), Directions.CENTER)
+              }"
+              ng-show="col < model.config.size - 1"
+              ng-repeat-end
+              ></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      <div class="stats well">
         <div
-          class="player player-{{getPlayerIndex(position(row, col))}}"
-          ng-show="isJoinedPlayer(position(row, col))"
-        ></div>
-      </td>
-      <td
-        class="wall wall-vertical"
-        ng-class="{
-          hovered: isWallHovered(position(row, col), Directions.VERTICAL),
-          'wall-filled': isWall(position(row, col), Directions.VERTICAL)
-        }"
-        ng-click="build(wall(position(row, col), Directions.VERTICAL))"
-        ng-mouseenter="hoverWall(wall(position(row, col), Directions.VERTICAL))"
-        ng-mouseleave="unhoverWall()"
-        ng-repeat-end
-        ng-show="col < model.config.size - 1"
-      ></td>
-    </tr>
-    <tr ng-repeat-end ng-show="row < model.config.size - 1">
-      <td
-        class="wall wall-horizontal"
-        ng-class="{
-          hovered: isWallHovered(position(row, col), Directions.HORIZONTAL),
-          'wall-filled': isWall(position(row, col), Directions.HORIZONTAL)
-        }"
-        ng-click="build(wall(position(row, col), Directions.HORIZONTAL))"
-        ng-mouseenter="hoverWall(wall(position(row, col), Directions.HORIZONTAL))"
-        ng-mouseleave="unhoverWall()"
-        ng-repeat-start="col in [] | range:model.config.size"
-      ></td>
-      <td
-        class="wall"
-        ng-class="{
-          hovered: isWallHovered(position(row, col), Directions.CENTER),
-          'wall-filled': isWall(position(row, col), Directions.CENTER)
-        }"
-        ng-show="col < model.config.size - 1"
-        ng-repeat-end
-      ></td>
-    </tr>
-  </table>
+          class="item"
+          ng-class="{
+            me: isMe(player.index),
+            winner: player.index == model.state.winner
+          }"
+          ng-repeat="player in model.state.players"
+        >
+          <div class="player player-{{player.index}} pull-left"></div>
+          <div class="wall wall-vertical wall-filled pull-left" ng-repeat="wall in [] | range:player.walls"></div>
+          <div class="clearfix"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 
 </div>
