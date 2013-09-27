@@ -9,7 +9,7 @@ angular
       views: {
         main: {
           controller: 'HomeCtrl',
-          templateUrl: '/app/home/home.tpl.html'
+          templateUrl: '/app/home/home.html'
         }
       }
     });

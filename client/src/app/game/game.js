@@ -9,7 +9,7 @@ angular
       views: {
         main: {
           controller: 'GameCtrl',
-          templateUrl: '/app/game/game.tpl.html'
+          templateUrl: '/app/game/game.html'
         }
       }
     });
@@ -98,15 +98,16 @@ angular
          * @type {Object}
          */
         hovered: {
-          cell: {
-            col: null,
-            row: null
-          },
-          wall: {
-            col: null,
-            direction: null,
-            row: null
-          }
+          /**
+           * Hovered cell
+           * @type {Position}
+           */
+          cell: null,
+          /**
+           * Hovered wall
+           * @type {Wall}
+           */
+          wall: null
         },
         /**
          * Game state
@@ -197,6 +198,7 @@ angular
      * @param {State} state Game state
      */
     $scope.setState = function(state) {
+      console.log(state)
       $scope.model.state = state;
     };
 
@@ -244,29 +246,21 @@ angular
 
     /**
      * Build a wall
-     * @param {number} row
-     * @param {number} col
-     * @param {Directions} direction
+     * @param {Wall} wall
      */
-    $scope.build = function(row, col, direction) {
+    $scope.build = function(wall) {
       $scope.command($scope.Commands.BUILD, {
-        col: col,
-        direction: direction,
-        gameId: $scope.model.gameId,
-        row: row
+        wall: wall
       });
     };
 
     /**
      * Move
-     * @param {number} row
-     * @param {number} col
+     * @param {Position} position
      */
-    $scope.move = function(row, col) {
+    $scope.move = function(position) {
       $scope.command($scope.Commands.MOVE, {
-        col: col,
-        gameId: $scope.model.gameId,
-        row: row
+        position: position
       });
     };
 
@@ -306,16 +300,15 @@ angular
 
     /**
      * Is wall exists at position
-     * @param {number} row
-     * @param {number} col
+     * @param {Position} position
      * @param {Directions} direction
      * @returns {boolean}
      */
-    $scope.isWall = function(row, col, direction) {
+    $scope.isWall = function(position, direction) {
       var exists = false;
 
       angular.forEach($scope.model.state.walls, function(wall) {
-        exists = exists || wall.row === row && wall.col === col && wall.direction === direction;
+        exists = exists || wall.position.row === position.row && wall.position.col === position.col && wall.direction === direction;
       });
 
       return exists;
@@ -323,13 +316,11 @@ angular
 
     /**
      * Hover cell
-     * @param {number} row
-     * @param {number} col
+     * @param {Position} position
      */
-    $scope.hoverCell = function(row, col) {
+    $scope.hoverCell = function(position) {
       if ($scope.isMyTurn()) {
-        $scope.model.hovered.cell.row = row;
-        $scope.model.hovered.cell.col = col;
+        $scope.model.hovered.cell = position;
       }
     };
 
@@ -337,31 +328,27 @@ angular
      * Unhover cell
      */
     $scope.unhoverCell = function() {
-      $scope.model.hovered.cell.row = null;
-      $scope.model.hovered.cell.col = null;
+      $scope.model.hovered.cell = null;
     };
 
     /**
      * Is cell hovered
-     * @param {number} row
-     * @param {number} col
+     * @param {Position} position
      * @returns {boolean}
      */
-    $scope.isCellHovered = function(row, col) {
-      return $scope.model.hovered.cell.row === row && $scope.model.hovered.cell.col === col;
+    $scope.isCellHovered = function(position) {
+      return $scope.model.hovered.cell &&
+        $scope.model.hovered.cell.row === position.row &&
+        $scope.model.hovered.cell.col === position.col;
     };
 
     /**
      * Hover wall
-     * @param {number} row
-     * @param {number} col
-     * @param {Directions} direction
+     * @param {Wall} wall
      */
-    $scope.hoverWall = function(row, col, direction) {
+    $scope.hoverWall = function(wall) {
       if ($scope.isMyTurn()) {
-        $scope.model.hovered.wall.row = row;
-        $scope.model.hovered.wall.col = col;
-        $scope.model.hovered.wall.direction = direction;
+        $scope.model.hovered.wall = wall;
       }
     };
 
@@ -369,32 +356,33 @@ angular
      * Unhover wall
      */
     $scope.unhoverWall = function() {
-      $scope.model.hovered.wall.row = null;
-      $scope.model.hovered.wall.col = null;
-      $scope.model.hovered.wall.direction = null;
+      $scope.model.hovered.wall = null;
     };
 
     /**
      * Is wall hovered (or nearby wall)
-     * @param {number} row
-     * @param {number} col
+     * @param {Position} position
      * @param {Directions} direction
      * @returns {boolean}
      */
-    $scope.isWallHovered = function(row, col, direction) {
+    $scope.isWallHovered = function(position, direction) {
+      if (!$scope.model.hovered.wall) {
+        return false;
+      }
+
       switch (direction) {
         case $scope.Directions.HORIZONTAL:
           return $scope.model.hovered.wall.direction === direction &&
-            $scope.model.hovered.wall.row === row &&
-            ($scope.model.hovered.wall.col === col || $scope.model.hovered.wall.col === col - 1);
+            $scope.model.hovered.wall.position.row === position.row &&
+            ($scope.model.hovered.wall.position.col === position.col || $scope.model.hovered.wall.position.col === position.col - 1);
 
         case $scope.Directions.VERTICAL:
           return $scope.model.hovered.wall.direction === direction &&
-            ($scope.model.hovered.wall.row === row || $scope.model.hovered.wall.row === row - 1) &&
-            $scope.model.hovered.wall.col === col;
+            ($scope.model.hovered.wall.position.row === position.row || $scope.model.hovered.wall.position.row === position.row - 1) &&
+            $scope.model.hovered.wall.position.col === position.col;
 
         case $scope.Directions.CENTER:
-          return $scope.model.hovered.wall.row === row && $scope.model.hovered.wall.col === col;
+          return $scope.model.hovered.wall.position.row === position.row && $scope.model.hovered.wall.position.col === position.col;
 
         default:
           return false;
@@ -419,15 +407,14 @@ angular
 
     /**
      * Get player index at position
-     * @param {number} row
-     * @param {number} col
+     * @param {Position} position
      * @returns {?number} Index or null if there is no players at position
      */
-    $scope.getPlayerIndex = function(row, col) {
+    $scope.getPlayerIndex = function(position) {
       var existedPlayer = null;
 
       angular.forEach($scope.model.state.players, function(player) {
-        if (player.position.row === row && player.position.col === col) {
+        if (player.position.row === position.row && player.position.col === position.col) {
           existedPlayer = player;
         }
       });
@@ -447,23 +434,21 @@ angular
 
     /**
      * Is joined player at position
-     * @param {number} row
-     * @param {number} col
+     * @param {Position} position
      * @returns {boolean}
      */
-    $scope.isJoinedPlayer = function(row, col) {
-      var index = $scope.getPlayerIndex(row, col);
+    $scope.isJoinedPlayer = function(position) {
+      var index = $scope.getPlayerIndex(position);
       return index !== null && $scope.model.state.players[index].uid !== null;
     };
 
     /**
      * Is active player at position
-     * @param {number} row
-     * @param {number} col
+     * @param {Position} position
      * @returns {boolean}
      */
-    $scope.isActivePlayer = function(row, col) {
-      var index = $scope.getPlayerIndex(row, col);
+    $scope.isActivePlayer = function(position) {
+      var index = $scope.getPlayerIndex(position);
       return index !== null && index === $scope.model.state.activePlayer;
     };
 
@@ -480,5 +465,33 @@ angular
       });
 
       return counter;
+    };
+
+    /**
+     * Create position
+     * @param {number} row
+     * @param {number} col
+     * @returns {Object}
+     * @todo Use models
+     */
+    $scope.position = function(row, col) {
+      return {
+        col: col,
+        row: row
+      };
+    };
+
+    /**
+     * Create wall
+     * @param {Position} position
+     * @param {Directions} direction
+     * @returns {Object}
+     * @todo Use models
+     */
+    $scope.wall = function(position, direction) {
+      return {
+        direction: direction,
+        position: position
+      };
     };
   });
