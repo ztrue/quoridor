@@ -42,14 +42,17 @@
         title="Players"
       >
         <span class="icon-user"></span>
-        <span ng-bind="game.joinedPlayers"></span>/<span ng-bind="game.config.players"></span></span>
-      <span class="label label-default" title="Size">
+        <span ng-bind="game.joinedPlayers"></span>/<span ng-bind="game.config.players"></span>
+      </span>
+      <span class="label label-default margin-left-1" title="Size">
         <span class="icon-th"></span>
-        <span ng-bind="game.config.size"></span></span>
-      <span class="label label-default" title="Walls">
+        <span ng-bind="game.config.size"></span>
+      </span>
+      <span class="label label-default margin-left-1" title="Walls">
         <span class="icon-reorder"></span>
-        <span ng-bind="game.config.walls"></span></span>
-      <button class="btn btn-primary" ng-click="open(game.id)">Open</button>
+        <span ng-bind="game.config.walls"></span>
+      </span>
+      <button class="btn btn-primary margin-left-1" ng-click="open(game.id)">Open</button>
     </h3>
   </div>
 

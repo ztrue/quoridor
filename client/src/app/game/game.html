@@ -20,13 +20,16 @@
     <h3 class="margin-left-1 margin-top-1 pull-left">
       <span class="label label-default" title="Players">
         <span class="icon-user"></span>
-        <span ng-bind="countJoinedPlayers()"></span>/<span ng-bind="model.config.players"></span></span>
-      <span class="label label-default" title="Size">
+        <span ng-bind="countJoinedPlayers()"></span>/<span ng-bind="model.config.players"></span>
+      </span>
+      <span class="label label-default margin-left-1" title="Size">
         <span class="icon-th"></span>
-        <span ng-bind="model.config.size"></span></span>
-      <span class="label label-default" title="Walls">
+        <span ng-bind="model.config.size"></span>
+      </span>
+      <span class="label label-default margin-left-1" title="Walls">
         <span class="icon-reorder"></span>
-        <span ng-bind="model.config.walls"></span></span>
+        <span ng-bind="model.config.walls"></span>
+      </span>
     </h3>
   </div>
 
@@ -46,11 +49,11 @@
               ng-mouseenter="hoverCell(position(row, col))"
               ng-mouseleave="unhoverCell()"
               ng-repeat-start="col in [] | range:model.config.size"
-              >
+            >
               <div
                 class="player player-{{getPlayerIndex(position(row, col))}}"
                 ng-show="isJoinedPlayer(position(row, col))"
-                ></div>
+              ></div>
             </td>
             <td
               class="wall wall-vertical"
@@ -63,7 +66,7 @@
               ng-mouseleave="unhoverWall()"
               ng-repeat-end
               ng-show="col < model.config.size - 1"
-              ></td>
+            ></td>
           </tr>
           <tr ng-repeat-end ng-show="row < model.config.size - 1">
             <td
@@ -76,7 +79,7 @@
               ng-mouseenter="hoverWall(wall(position(row, col), Directions.HORIZONTAL))"
               ng-mouseleave="unhoverWall()"
               ng-repeat-start="col in [] | range:model.config.size"
-              ></td>
+            ></td>
             <td
               class="wall"
               ng-class="{
@@ -85,26 +88,31 @@
               }"
               ng-show="col < model.config.size - 1"
               ng-repeat-end
-              ></td>
+            ></td>
           </tr>
         </table>
       </div>
     </div>
 
     <div class="col-sm-6">
-      <div class="stats well">
-        <div
-          class="item"
-          ng-class="{
-            me: isMe(player.index),
-            winner: player.index == model.state.winner
-          }"
-          ng-repeat="player in model.state.players"
-        >
-          <div class="player player-{{player.index}} pull-left"></div>
-          <div class="wall wall-vertical wall-filled pull-left" ng-repeat="wall in [] | range:player.walls"></div>
-          <div class="clearfix"></div>
-        </div>
+      <div class="well">
+        <h3 ng-repeat="player in model.state.players">
+          <span class="label player-{{player.index}}">
+            <span class="icon-user"></span>
+            <span ng-show="isMe(player.index)">Me</span>
+            <span ng-show="player.index == model.state.winner">Win!</span>
+          </span>
+          <span
+            class="label margin-left-1"
+            ng-class="{
+              'label-default': player.walls === 0,
+              'label-primary': player.walls > 0
+            }"
+          >
+            <span class="icon-reorder"></span>
+            <span ng-bind="player.walls"></span>
+          </span>
+        </h3>
       </div>
     </div>
 

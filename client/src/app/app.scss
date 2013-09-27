@@ -18,6 +18,10 @@ h6 {
 }
 
 @for $i from 0 through 4 {
+  .margin-#{$i} {
+    margin: 5px * $i;
+  }
+
   @each $side in top, right, bottom, left {
     .margin-#{$side}-#{$i} {
       margin-#{$side}: 5px * $i;
