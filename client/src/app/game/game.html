@@ -56,27 +56,27 @@
       <td
         class="cell"
         ng-class="{
-          active: isActivePlayer(row, col),
-          hovered: isCellHovered(row, col)
+          active: isActivePlayer(position(row, col)),
+          hovered: isCellHovered(position(row, col))
         }"
-        ng-click="move(row, col)"
-        ng-mouseenter="hoverCell(row, col)"
+        ng-click="move(position(row, col))"
+        ng-mouseenter="hoverCell(position(row, col))"
         ng-mouseleave="unhoverCell()"
         ng-repeat-start="col in [] | range:model.config.size"
       >
         <div
-          class="player player-{{getPlayerIndex(row, col)}}"
-          ng-show="isJoinedPlayer(row, col)"
+          class="player player-{{getPlayerIndex(position(row, col))}}"
+          ng-show="isJoinedPlayer(position(row, col))"
         ></div>
       </td>
       <td
         class="wall wall-vertical"
         ng-class="{
-          hovered: isWallHovered(row, col, Directions.VERTICAL),
-          'wall-filled': isWall(row, col, Directions.VERTICAL)
+          hovered: isWallHovered(position(row, col), Directions.VERTICAL),
+          'wall-filled': isWall(position(row, col), Directions.VERTICAL)
         }"
-        ng-click="build(row, col, Directions.VERTICAL)"
-        ng-mouseenter="hoverWall(row, col, Directions.VERTICAL)"
+        ng-click="build(wall(position(row, col), Directions.VERTICAL))"
+        ng-mouseenter="hoverWall(wall(position(row, col), Directions.VERTICAL))"
         ng-mouseleave="unhoverWall()"
         ng-repeat-end
         ng-show="col < model.config.size - 1"
@@ -86,19 +86,19 @@
       <td
         class="wall wall-horizontal"
         ng-class="{
-          hovered: isWallHovered(row, col, Directions.HORIZONTAL),
-          'wall-filled': isWall(row, col, Directions.HORIZONTAL)
+          hovered: isWallHovered(position(row, col), Directions.HORIZONTAL),
+          'wall-filled': isWall(position(row, col), Directions.HORIZONTAL)
         }"
-        ng-click="build(row, col, Directions.HORIZONTAL)"
-        ng-mouseenter="hoverWall(row, col, Directions.HORIZONTAL)"
+        ng-click="build(wall(position(row, col), Directions.HORIZONTAL))"
+        ng-mouseenter="hoverWall(wall(position(row, col), Directions.HORIZONTAL))"
         ng-mouseleave="unhoverWall()"
         ng-repeat-start="col in [] | range:model.config.size"
       ></td>
       <td
         class="wall"
         ng-class="{
-          hovered: isWallHovered(row, col, Directions.CENTER),
-          'wall-filled': isWall(row, col, Directions.CENTER)
+          hovered: isWallHovered(position(row, col), Directions.CENTER),
+          'wall-filled': isWall(position(row, col), Directions.CENTER)
         }"
         ng-show="col < model.config.size - 1"
         ng-repeat-end
