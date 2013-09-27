@@ -198,7 +198,6 @@ angular
      * @param {State} state Game state
      */
     $scope.setState = function(state) {
-      console.log(state)
       $scope.model.state = state;
     };
 
