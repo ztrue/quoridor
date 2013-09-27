@@ -19,7 +19,7 @@ var games = {};
  */
 function createGame(config) {
   var gameId = generateGameId();
-  var game = faf.model('game').new({
+  var game = module.exports.model('game').new({
     config: config,
     id: gameId
   });
@@ -65,8 +65,8 @@ function resetSockets(game) {
 
   // TODO reset UID only for passed game
   uids.forEach(function(uid) {
-    faf.module('auth').set(uid, 'index', null);
-  });
+    this.module('auth').set(uid, 'index', null);
+  }.bind(this));
 
   module.exports.client.resetUid(null, {
     gameId: game.id
@@ -139,7 +139,7 @@ module.exports = {
     /**
      * On command event
      * @param {Socket} socket Socket
-     * @param {function(?string, Object)} callback Event callback
+     * @param {function(string=, Object=)} callback Event callback
      * @param {Object} data Event data
      */
     command: function(socket, callback, data) {
@@ -149,7 +149,7 @@ module.exports = {
           throw 'Game does not exists';
         }
 
-        var index = faf.module('auth').getBySocketId(socket.id, 'index');
+        var index = this.module('auth').getBySocketId(socket.id, 'index');
         // TODO check by UID, not by index
         // TODO check at game model, not here
         if (index === null || game.state.activePlayer !== index) {
@@ -184,13 +184,13 @@ module.exports = {
      */
     connection: function(socket) {
       // uid is equal to socket ID
-      faf.module('auth').bind(socket.id, socket.id);
+      this.module('auth').bind(socket.id, socket.id);
     },
 
     /**
      * On create game event
      * @param {Socket} socket Socket
-     * @param {function(?string, Object)} callback Event callback
+     * @param {function(string=, Object=)} callback Event callback
      * @param {Object} data Event data
      */
     create: function(socket, callback, data) {
@@ -213,7 +213,6 @@ module.exports = {
           gameId: game.id
         });
       } catch (err) {
-
         callback(err);
       }
     },
@@ -223,7 +222,7 @@ module.exports = {
      * @param {Socket} socket Socket
      */
     disconnect: function(socket) {
-      var uid = faf.module('auth').getUserId(socket.id);
+      var uid = this.module('auth').getUserId(socket.id);
 
       _(games).each(function(game) {
         var index = game.exit(uid);
@@ -241,7 +240,7 @@ module.exports = {
     /**
      * On exit event
      * @param {Socket} socket Socket
-     * @param {function(?string, Object)} callback Event callback
+     * @param {function(string=, Object=)} callback Event callback
      * @param {Object} data Event data
      */
     exit: function(socket, callback, data) {
@@ -251,11 +250,11 @@ module.exports = {
           throw 'Game not exists';
         }
 
-        var uid = faf.module('auth').getUserId(socket.id);
+        var uid = this.module('auth').getUserId(socket.id);
 
         var index = game.exit(uid);
 
-        faf.module('auth').setBySocketId(socket.id, 'index', null);
+        this.module('auth').setBySocketId(socket.id, 'index', null);
 
         callback(null, {
           uid: null
@@ -276,18 +275,18 @@ module.exports = {
     /**
      * On get default config event
      * @param {Socket} socket Socket
-     * @param {function(?string, Object)} callback Event callback
+     * @param {function(string=, Object=)} callback Event callback
      */
     getDefaultConfig: function(socket, callback) {
       callback(null, {
-        config: faf.model('game').getDefaultConfig()
+        config: this.model('game').getDefaultConfig()
       })
     },
 
     /**
      * On get games list event
      * @param {Socket} socket Socket
-     * @param {function(?string, Object)} callback Event callback
+     * @param {function(string=, Object=)} callback Event callback
      */
     getGamesList: function(socket, callback) {
       callback(null, {
@@ -298,7 +297,7 @@ module.exports = {
     /**
      * On get state event
      * @param {Socket} socket Socket
-     * @param {function(?string, Object)} callback Event callback
+     * @param {function(string=, Object=)} callback Event callback
      * @param {Object} data Event data
      */
     getState: function(socket, callback, data) {
@@ -320,7 +319,7 @@ module.exports = {
     /**
      * On join event
      * @param {Socket} socket Socket
-     * @param {function(?string, Object)} callback Event callback
+     * @param {function(string=, Object=)} callback Event callback
      * @param {Object} data Event data
      */
     join: function(socket, callback, data) {
@@ -330,14 +329,14 @@ module.exports = {
           throw 'Game not exists';
         }
 
-        var uid = faf.module('auth').getUserId(socket.id);
+        var uid = this.module('auth').getUserId(socket.id);
 
         var index = game.join(uid);
         if (index === null) {
           throw 'Game is full';
         }
 
-        faf.module('auth').setBySocketId(socket.id, 'index', index);
+        this.module('auth').setBySocketId(socket.id, 'index', index);
 
         callback(null, {
           uid: uid
