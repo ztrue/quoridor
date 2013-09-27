@@ -4,7 +4,7 @@
     <form class="form-inline">
       <span class="icon-user icon-large" title="Players"></span>
       <input
-        class="form-control input-short margin-right-1"
+        class="form-control input-short margin-right-1 text-center"
         maxlength="2"
         ng-model="model.form.data.players"
         type="text"
@@ -12,7 +12,7 @@
 
       <span class="icon-th icon-large" title="Size"></span>
       <input
-        class="form-control input-short margin-right-1"
+        class="form-control input-short margin-right-1 text-center"
         maxlength="2"
         ng-model="model.form.data.size"
         type="text"
@@ -20,7 +20,7 @@
 
       <span class="icon-reorder icon-large" title="Walls"></span>
       <input
-        class="form-control input-short margin-right-1"
+        class="form-control input-short margin-right-1 text-center"
         maxlength="2"
         ng-model="model.form.data.walls"
         type="text"
@@ -32,14 +32,21 @@
   </div>
 
   <div class="well">
-    <h3 ng-repeat="game in model.games | orderBy:'joinedPlayers':true">
-      <span class="label label-success" title="Players">
+    <h3 class="margin-top-1" ng-repeat="game in model.games | orderBy:'joinedPlayers':true">
+      <span
+        class="label"
+        ng-class="{
+          'label-default': game.joinedPlayers === 0,
+          'label-primary': game.joinedPlayers > 0
+        }"
+        title="Players"
+      >
         <span class="icon-user"></span>
         <span ng-bind="game.joinedPlayers"></span>/<span ng-bind="game.config.players"></span></span>
-      <span class="label label-warning" title="Size">
+      <span class="label label-default" title="Size">
         <span class="icon-th"></span>
         <span ng-bind="game.config.size"></span></span>
-      <span class="label label-danger" title="Walls">
+      <span class="label label-default" title="Walls">
         <span class="icon-reorder"></span>
         <span ng-bind="game.config.walls"></span></span>
       <button class="btn btn-primary" ng-click="open(game.id)">Open</button>

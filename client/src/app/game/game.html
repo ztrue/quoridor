@@ -1,11 +1,11 @@
 <div ng-init="init()">
 
   <div class="clearfix well">
-    <button class="btn btn-danger pull-left" ng-click="openGamesList()" ng-show="!isExitable()" title="Back to games list">
+    <button class="btn btn-primary pull-left" ng-click="openGamesList()" ng-show="!isExitable()" title="Back to games list">
       <span class="icon-home icon-large"></span>
     </button>
 
-    <button class="btn btn-danger pull-left" ng-click="exit()" ng-show="isExitable()" title="Exit">
+    <button class="btn btn-primary pull-left" ng-click="exit()" ng-show="isExitable()" title="Exit">
       Exit
     </button>
 
@@ -13,18 +13,18 @@
       Join
     </button>
 
-    <button class="btn btn-warning pull-right" ng-click="skip()" ng-show="isMyTurn()">
+    <button class="btn btn-primary pull-right" ng-click="skip()" ng-show="isMyTurn()">
       Skip
     </button>
 
-    <h3 class="margin-left-4 margin-top-1 pull-left">
-      <span class="label label-success" title="Players">
+    <h3 class="margin-left-1 margin-top-1 pull-left">
+      <span class="label label-default" title="Players">
         <span class="icon-user"></span>
         <span ng-bind="countJoinedPlayers()"></span>/<span ng-bind="model.config.players"></span></span>
-      <span class="label label-warning" title="Size">
+      <span class="label label-default" title="Size">
         <span class="icon-th"></span>
         <span ng-bind="model.config.size"></span></span>
-      <span class="label label-danger" title="Walls">
+      <span class="label label-default" title="Walls">
         <span class="icon-reorder"></span>
         <span ng-bind="model.config.walls"></span></span>
     </h3>
