@@ -2,7 +2,7 @@
 
   <div class="clearfix well">
     <button class="btn btn-primary pull-left" ng-click="openGamesList()" ng-show="!isExitable()" title="Back to games list">
-      <span class="icon-home icon-large"></span>
+      <span class="fa fa-home fa-lg"></span>
     </button>
 
     <button class="btn btn-primary pull-left" ng-click="exit()" ng-show="isExitable()" title="Exit">
@@ -19,15 +19,15 @@
 
     <h3 class="margin-left-1 margin-top-1 pull-left">
       <span class="label label-default" title="Players">
-        <span class="icon-user"></span>
+        <span class="fa fa-user"></span>
         <span ng-bind="countJoinedPlayers()"></span>/<span ng-bind="model.config.players"></span>
       </span>
       <span class="label label-default margin-left-1" title="Size">
-        <span class="icon-th"></span>
+        <span class="fa fa-th"></span>
         <span ng-bind="model.config.size"></span>
       </span>
       <span class="label label-default margin-left-1" title="Walls">
-        <span class="icon-reorder"></span>
+        <span class="fa fa-bars"></span>
         <span ng-bind="model.config.walls"></span>
       </span>
     </h3>
@@ -98,7 +98,7 @@
       <div class="well">
         <h3 ng-repeat="player in model.state.players">
           <span class="label player-{{player.index}}">
-            <span class="icon-user"></span>
+            <span class="fa fa-user"></span>
             <span ng-show="isMe(player.index)">Me</span>
             <span ng-show="player.index == model.state.winner">Win!</span>
           </span>
@@ -109,7 +109,7 @@
               'label-primary': player.walls > 0
             }"
           >
-            <span class="icon-reorder"></span>
+            <span class="fa fa-bars"></span>
             <span ng-bind="player.walls"></span>
           </span>
         </h3>
