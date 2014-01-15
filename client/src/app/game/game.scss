@@ -3,7 +3,7 @@ $tableFault: 2px;
 $cellSize: 30px;
 $cellSizeInner: $cellSize - $tableFault;
 $cellBackground: transparent;
-$cellActiveBackground: #fff;
+$cellActiveBackground: #2c3e50;
 $cellHoveredBackground: #95a5a6;
 
 $wallSize: $cellSize / 3;
@@ -22,71 +22,84 @@ $player3Background: #f39c12;
 $winnerBackground: #9f9;
 $meBackground: #ccc;
 
-.field {
-  border: solid $wallSize;
-  border-collapse: separate;
-  border-right-color: $player0Background;
-  border-left-color: $player1Background;
-  border-bottom-color: $player2Background;
-  border-top-color: $player3Background;
-  margin: auto;
+.game {
+  .bar {
+    .properties {
+      line-height: 40px;
+    }
+  }
 
-  .cell {
-    background: $cellBackground;
-    height: $cellSize;
+  .info {
+    font-size: 18px;
+    padding: 5px;
+  }
+
+  .field {
+    border: solid $wallSize;
+    border-collapse: separate;
+    border-right-color: $player0Background;
+    border-left-color: $player1Background;
+    border-bottom-color: $player2Background;
+    border-top-color: $player3Background;
+    margin: auto;
+
+    .cell {
+      background: $cellBackground;
+      height: $cellSize;
+      width: $cellSize;
+    }
+
+    .cell.hovered {
+      background: $cellHoveredBackground;
+    }
+
+    .cell.active {
+      background: $cellActiveBackground;
+    }
+  }
+
+  .wall {
+    background: $wallBackground;
+    height: $wallSize;
+    width: $wallSize;
+  }
+
+  .wall.wall-horizontal {
     width: $cellSize;
   }
 
-  .cell.hovered {
-    background: $cellHoveredBackground;
+  .wall.wall-vertical {
+    height: $cellSize;
   }
 
-  .cell.active {
-    background: $cellActiveBackground;
+  .wall.hovered {
+    background: $wallHoveredBackground;
   }
-}
 
-.wall {
-  background: $wallBackground;
-  height: $wallSize;
-  width: $wallSize;
-}
+  .wall.wall-filled {
+    background: $wallFilledBackground;
+  }
 
-.wall.wall-horizontal {
-  width: $cellSize;
-}
+  .player {
+    border-radius: $playerRadius;
+    height: $playerSize;
+    margin: $playerMargin;
+    width: $playerSize;
+  }
 
-.wall.wall-vertical {
-  height: $cellSize;
-}
+  .player-0 {
+    background: $player0Background;
+  }
 
-.wall.hovered {
-  background: $wallHoveredBackground;
-}
+  .player-1 {
+    background: $player1Background;
+  }
 
-.wall.wall-filled {
-  background: $wallFilledBackground;
-}
+  .player-2 {
+    background: $player2Background;
+  }
 
-.player {
-  border-radius: $playerRadius;
-  height: $playerSize;
-  margin: $playerMargin;
-  width: $playerSize;
-}
-
-.player-0 {
-  background: $player0Background;
-}
-
-.player-1 {
-  background: $player1Background;
-}
-
-.player-2 {
-  background: $player2Background;
-}
-
-.player-3 {
-  background: $player3Background;
+  .player-3 {
+    background: $player3Background;
+  }
 }

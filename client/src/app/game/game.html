@@ -1,102 +1,46 @@
-<div ng-init="init()">
+<div class="game height-container" ng-init="init()">
 
-  <div class="clearfix well">
-    <button class="btn btn-primary pull-left" ng-click="openGamesList()" ng-show="!isExitable()" title="Back to games list">
-      <span class="fa fa-home fa-lg"></span>
-    </button>
-
-    <button class="btn btn-primary pull-left" ng-click="exit()" ng-show="isExitable()" title="Exit">
-      Exit
-    </button>
-
-    <button class="btn btn-primary pull-right" ng-click="join()" ng-show="isJoinable()" title="Join">
-      Join
-    </button>
-
-    <button class="btn btn-primary pull-right" ng-click="skip()" ng-show="isMyTurn()">
-      Skip
-    </button>
-
-    <h3 class="margin-left-1 margin-top-1 pull-left">
-      <span class="label label-default" title="Players">
-        <span class="fa fa-user"></span>
-        <span ng-bind="countJoinedPlayers()"></span>/<span ng-bind="model.config.players"></span>
-      </span>
-      <span class="label label-default margin-left-1" title="Size">
-        <span class="fa fa-th"></span>
-        <span ng-bind="model.config.size"></span>
-      </span>
-      <span class="label label-default margin-left-1" title="Walls">
-        <span class="fa fa-bars"></span>
-        <span ng-bind="model.config.walls"></span>
-      </span>
-    </h3>
-  </div>
-
-  <div class="row">
-    <div class="col-sm-6">
-
-      <div class="well">
-        <table class="field" ng-show="model.config.size > 0">
-          <tr ng-repeat-start="row in [] | range:model.config.size">
-            <td
-              class="cell"
-              ng-class="{
-                active: isActivePlayer(position(row, col)),
-                hovered: isCellHovered(position(row, col))
-              }"
-              ng-click="move(position(row, col))"
-              ng-mouseenter="hoverCell(position(row, col))"
-              ng-mouseleave="unhoverCell()"
-              ng-repeat-start="col in [] | range:model.config.size"
-            >
-              <div
-                class="player player-{{getPlayerIndex(position(row, col))}}"
-                ng-show="isJoinedPlayer(position(row, col))"
-              ></div>
-            </td>
-            <td
-              class="wall wall-vertical"
-              ng-class="{
-                hovered: isWallHovered(position(row, col), Directions.VERTICAL),
-                'wall-filled': isWall(position(row, col), Directions.VERTICAL)
-              }"
-              ng-click="build(wall(position(row, col), Directions.VERTICAL))"
-              ng-mouseenter="hoverWall(wall(position(row, col), Directions.VERTICAL))"
-              ng-mouseleave="unhoverWall()"
-              ng-repeat-end
-              ng-show="col < model.config.size - 1"
-            ></td>
-          </tr>
-          <tr ng-repeat-end ng-show="row < model.config.size - 1">
-            <td
-              class="wall wall-horizontal"
-              ng-class="{
-                hovered: isWallHovered(position(row, col), Directions.HORIZONTAL),
-                'wall-filled': isWall(position(row, col), Directions.HORIZONTAL)
-              }"
-              ng-click="build(wall(position(row, col), Directions.HORIZONTAL))"
-              ng-mouseenter="hoverWall(wall(position(row, col), Directions.HORIZONTAL))"
-              ng-mouseleave="unhoverWall()"
-              ng-repeat-start="col in [] | range:model.config.size"
-            ></td>
-            <td
-              class="wall"
-              ng-class="{
-                hovered: isWallHovered(position(row, col), Directions.CENTER),
-                'wall-filled': isWall(position(row, col), Directions.CENTER)
-              }"
-              ng-show="col < model.config.size - 1"
-              ng-repeat-end
-            ></td>
-          </tr>
-        </table>
+  <div class="height-fixed">
+    <div class="bar well">
+      <div class="row">
+        <div class="col-xs-3 text-left">
+          <button class="btn btn-primary" ng-click="openGamesList()" ng-show="!isExitable()" title="Back to games list">
+            <span class="fa fa-home"></span>
+          </button>
+          <button class="btn btn-primary" ng-click="exit()" ng-show="isExitable()" title="Exit">
+            Exit
+          </button>
+        </div>
+        <div class="col-xs-6 properties text-center">
+          <span class="label label-default" title="Players">
+            <span class="fa fa-user"></span>
+            <span ng-bind="countJoinedPlayers()"></span>/<span ng-bind="model.config.players"></span>
+          </span>
+          <span class="label label-default margin-left-1" title="Size">
+            <span class="fa fa-th"></span>
+            <span ng-bind="model.config.size"></span>
+          </span>
+          <span class="label label-default margin-left-1" title="Walls">
+            <span class="fa fa-bars"></span>
+            <span ng-bind="model.config.walls"></span>
+          </span>
+        </div>
+        <div class="col-xs-3 text-right">
+          <button class="btn btn-primary" ng-click="join()" ng-show="isJoinable()" title="Join">
+            Join
+          </button>
+          <button class="btn btn-primary" ng-click="skip()" ng-show="isMyTurn()">
+            Skip
+          </button>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="col-sm-6">
-      <div class="well">
-        <h3 ng-repeat="player in model.state.players">
+  <div class="height-fixed">
+    <div class="info margin-vertical-1">
+      <div class="row">
+        <div class="col-xs-3 text-center" ng-repeat="player in model.state.players">
           <span class="label player-{{player.index}}">
             <span class="fa fa-user"></span>
             <span ng-show="isMe(player.index)">Me</span>
@@ -112,10 +56,68 @@
             <span class="fa fa-bars"></span>
             <span ng-bind="player.walls"></span>
           </span>
-        </h3>
+        </div>
       </div>
     </div>
+  </div>
 
+  <div class="height-stretch">
+    <div class="height-scroll">
+      <table class="field" ng-show="model.config.size > 0">
+        <tr ng-repeat-start="row in [] | range:model.config.size">
+          <td
+            class="cell"
+            ng-class="{
+              active: isActivePlayer(position(row, col)),
+              hovered: isCellHovered(position(row, col))
+            }"
+            ng-click="move(position(row, col))"
+            ng-mouseenter="hoverCell(position(row, col))"
+            ng-mouseleave="unhoverCell()"
+            ng-repeat-start="col in [] | range:model.config.size"
+          >
+            <div
+              class="player player-{{getPlayerIndex(position(row, col))}}"
+              ng-show="isJoinedPlayer(position(row, col))"
+            ></div>
+          </td>
+          <td
+            class="wall wall-vertical"
+            ng-class="{
+              hovered: isWallHovered(position(row, col), Directions.VERTICAL),
+              'wall-filled': isWall(position(row, col), Directions.VERTICAL)
+            }"
+            ng-click="build(wall(position(row, col), Directions.VERTICAL))"
+            ng-mouseenter="hoverWall(wall(position(row, col), Directions.VERTICAL))"
+            ng-mouseleave="unhoverWall()"
+            ng-repeat-end
+            ng-show="col < model.config.size - 1"
+          ></td>
+        </tr>
+        <tr ng-repeat-end ng-show="row < model.config.size - 1">
+          <td
+            class="wall wall-horizontal"
+            ng-class="{
+              hovered: isWallHovered(position(row, col), Directions.HORIZONTAL),
+              'wall-filled': isWall(position(row, col), Directions.HORIZONTAL)
+            }"
+            ng-click="build(wall(position(row, col), Directions.HORIZONTAL))"
+            ng-mouseenter="hoverWall(wall(position(row, col), Directions.HORIZONTAL))"
+            ng-mouseleave="unhoverWall()"
+            ng-repeat-start="col in [] | range:model.config.size"
+          ></td>
+          <td
+            class="wall"
+            ng-class="{
+              hovered: isWallHovered(position(row, col), Directions.CENTER),
+              'wall-filled': isWall(position(row, col), Directions.CENTER)
+            }"
+            ng-show="col < model.config.size - 1"
+            ng-repeat-end
+          ></td>
+        </tr>
+      </table>
+    </div>
   </div>
 
 </div>

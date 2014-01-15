@@ -1,0 +1,74 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  .label {
+    font-weight: normal;
+  }
+}
+
+.form-inline .form-control {
+  display: inline-block;
+}
+
+.input-short {
+  width: 55px;
+}
+
+$step: 5px;
+
+@for $i from 0 through 4 {
+  .margin-#{$i} {
+    margin: $step * $i;
+  }
+
+  .margin-vertical-#{$i} {
+    margin-bottom: $step * $i;
+    margin-top: $step * $i;
+  }
+
+  .margin-horizontal-#{$i} {
+    margin-left: $step * $i;
+    margin-right: $step * $i;
+  }
+
+  @each $side in top, right, bottom, left {
+    .margin-#{$side}-#{$i} {
+      margin-#{$side}: $step * $i;
+    }
+  }
+}
+
+a,
+a:hover {
+  cursor: pointer;
+}
+
+html,
+body,
+.height-full {
+  height: 100%;
+}
+
+.height-scroll {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.height-container {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+
+.height-fixed {
+  display: table-row;
+}
+
+.height-stretch {
+  display: table-row;
+  height: 100%;
+}

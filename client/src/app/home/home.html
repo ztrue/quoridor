@@ -1,59 +1,66 @@
-<div ng-init="init()">
+<div class="home height-container" ng-init="init()">
 
-  <div class="well">
-    <form class="form-inline">
-      <span class="fa fa-user fa-lg" title="Players"></span>
-      <input
-        class="form-control input-short margin-right-1 text-center"
-        maxlength="2"
-        ng-model="model.form.data.players"
-        type="text"
-      >
+  <div class="height-fixed">
+    <div class="bar text-center well">
+      <form class="form-inline">
+        <span class="fa fa-user" title="Players"></span>
+        <input
+          class="form-control input-short margin-right-1 text-center"
+          maxlength="2"
+          ng-model="model.form.data.players"
+          type="text"
+        >
 
-      <span class="fa fa-th fa-lg" title="Size"></span>
-      <input
-        class="form-control input-short margin-right-1 text-center"
-        maxlength="2"
-        ng-model="model.form.data.size"
-        type="text"
-      >
+        <span class="fa fa-th" title="Size"></span>
+        <input
+          class="form-control input-short margin-right-1 text-center"
+          maxlength="2"
+          ng-model="model.form.data.size"
+          type="text"
+        >
 
-      <span class="fa fa-bars fa-lg" title="Walls"></span>
-      <input
-        class="form-control input-short margin-right-1 text-center"
-        maxlength="2"
-        ng-model="model.form.data.walls"
-        type="text"
-      >
+        <span class="fa fa-bars" title="Walls"></span>
+        <input
+          class="form-control input-short margin-right-1 text-center"
+          maxlength="2"
+          ng-model="model.form.data.walls"
+          type="text"
+        >
 
-      <button class="btn btn-primary" ng-click="create()">Create</button>
-    </form>
-    <p class="text-danger" ng-bind="model.form.error" ng-show="model.form.error"></p>
+        <button class="btn btn-primary" ng-click="create()">Create</button>
+      </form>
+      <p class="text-danger" ng-bind="model.form.error" ng-show="model.form.error"></p>
+    </div>
   </div>
 
-  <div class="well">
-    <h3 class="margin-top-1" ng-repeat="game in model.games | orderBy:'joinedPlayers':true">
-      <span
-        class="label"
-        ng-class="{
-          'label-default': game.joinedPlayers === 0,
-          'label-primary': game.joinedPlayers > 0
-        }"
-        title="Players"
-      >
-        <span class="fa fa-user"></span>
-        <span ng-bind="game.joinedPlayers"></span>/<span ng-bind="game.config.players"></span>
-      </span>
-      <span class="label label-default margin-left-1" title="Size">
-        <span class="fa fa-th"></span>
-        <span ng-bind="game.config.size"></span>
-      </span>
-      <span class="label label-default margin-left-1" title="Walls">
-        <span class="fa fa-bars"></span>
-        <span ng-bind="game.config.walls"></span>
-      </span>
-      <button class="btn btn-primary margin-left-1" ng-click="open(game.id)">Open</button>
-    </h3>
+  <div class="height-stretch">
+    <div class="height-scroll">
+      <ul class="nav nav-pills nav-stacked game-list">
+        <li ng-repeat="game in model.games | orderBy:'joinedPlayers':true">
+          <a ng-click="open(game.id)">
+            <span
+              class="label"
+              ng-class="{
+                'label-default': game.joinedPlayers === 0,
+                'label-primary': game.joinedPlayers > 0
+              }"
+              title="Players"
+            >
+              <span class="fa fa-user"></span>
+              <span ng-bind="game.joinedPlayers"></span>/<span ng-bind="game.config.players"></span>
+            </span>
+            <span class="label label-default margin-left-1" title="Size">
+              <span class="fa fa-th"></span>
+              <span ng-bind="game.config.size"></span>
+            </span>
+            <span class="label label-default margin-left-1" title="Walls">
+              <span class="fa fa-bars"></span>
+              <span ng-bind="game.config.walls"></span>
+            </span>
+          </a>
+        </li>
+      </ul>
+    </div>
   </div>
 
 </div>
